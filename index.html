@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Granja de Huevos — Control</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#2E7D32;--primary-light:#4CAF50;--primary-dark:#1B5E20;
+  --accent:#F9A825;--accent-light:#FFF8E1;
+  --bg:#F5F5F0;--surface:#FFF;--surface-alt:#FAFAF7;
+  --text:#1A1A2E;--text-secondary:#5A5A6E;--text-light:#8A8A9E;
+  --border:#E0E0D8;--danger:#D32F2F;--danger-light:#FFEBEE;
+  --success:#2E7D32;--success-light:#E8F5E9;
+  --warning:#F57F17;--warning-light:#FFF8E1;
+  --info:#1565C0;--info-light:#E3F2FD;
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-lg:0 4px 12px rgba(0,0,0,.12);
+  --radius:8px;--radius-lg:12px;
+  --sidebar-w:240px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text)}
+a{color:var(--primary);text-decoration:none}
+button{cursor:pointer;font-family:var(--font)}
+input,select,textarea{font-family:var(--font);font-size:.9rem}
+
+/* Layout */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);background:var(--primary-dark);color:#fff;display:flex;flex-direction:column;flex-shrink:0;transition:transform .3s}
+.sidebar-header{padding:20px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px}
+.sidebar-header svg{width:32px;height:32px;fill:var(--accent)}
+.sidebar-header h1{font-size:1.1rem;font-weight:600;line-height:1.2}
+.sidebar-header small{font-size:.7rem;opacity:.7;display:block}
+.sidebar-nav{flex:1;padding:8px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:rgba(255,255,255,.8);font-size:.9rem;transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.15);color:#fff;font-weight:600;border-right:3px solid var(--accent)}
+.nav-item svg{width:20px;height:20px;fill:currentColor;flex-shrink:0}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);font-size:.75rem;opacity:.5;text-align:center}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar h2{font-size:1.25rem;font-weight:600}
+.topbar-actions{display:flex;gap:8px}
+.content{flex:1;overflow-y:auto;padding:24px}
+.menu-toggle{display:none;background:none;border:none;padding:8px;color:var(--text)}
+.menu-toggle svg{width:24px;height:24px}
+
+/* Cards & Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
+.stat-card.accent{border-left-color:var(--accent)}
+.stat-card.danger{border-left-color:var(--danger)}
+.stat-card.info{border-left-color:var(--info)}
+.stat-label{font-size:.8rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-value{font-size:1.8rem;font-weight:700;line-height:1.2}
+.stat-sub{font-size:.8rem;color:var(--text-light);margin-top:4px}
+
+/* Tables */
+.table-wrap{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.table-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.table-header h3{font-size:1rem;font-weight:600}
+.table-filters{display:flex;gap:8px;flex-wrap:wrap}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.875rem}
+th{text-align:left;padding:12px 16px;background:var(--surface-alt);font-weight:600;color:var(--text-secondary);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:var(--surface-alt)}
+.empty-row td{text-align:center;color:var(--text-light);padding:40px 16px;font-style:italic}
+
+/* Badges */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+.badge-pendiente{background:var(--warning-light);color:var(--warning)}
+.badge-entregado{background:var(--success-light);color:var(--success)}
+.badge-cancelado{background:var(--danger-light);color:var(--danger)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:.875rem;font-weight:500;border:1px solid transparent;transition:all .15s}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-accent{background:var(--accent);color:#000}.btn-accent:hover{background:#e09100}
+.btn-outline{background:transparent;color:var(--primary);border-color:var(--border)}.btn-outline:hover{background:var(--surface-alt)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b71c1c}
+.btn-sm{padding:5px 10px;font-size:.8rem}
+.btn-icon{padding:6px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--text-secondary)}.btn-icon:hover{background:var(--surface-alt);color:var(--text)}
+.btn svg{width:16px;height:16px;fill:currentColor}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+input[type="text"],input[type="number"],input[type="date"],input[type="tel"],select,textarea{
+  width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9rem;background:var(--surface);transition:border-color .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(46,125,50,.15)}
+textarea{resize:vertical;min-height:60px}
+.input-sm{padding:6px 10px;font-size:.8rem}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:1.05rem;font-weight:600}
+.modal-close{background:none;border:none;font-size:1.3rem;color:var(--text-light);padding:4px 8px}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* Toast */
+.toast-container{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:.875rem;font-weight:500;box-shadow:var(--shadow-lg);animation:slideIn .3s ease}
+.toast-success{background:var(--success)}.toast-error{background:var(--danger)}.toast-info{background:var(--info)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* Chart */
+.chart-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;margin-bottom:24px}
+.chart-card h3{font-size:1rem;font-weight:600;margin-bottom:16px}
+canvas{width:100%!important;height:200px!important}
+
+/* Quick form */
+.quick-form{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;margin-bottom:24px}
+.quick-form h3{font-size:1rem;font-weight:600;margin-bottom:16px}
+.quick-form .form-inline{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.quick-form .form-inline .form-group{margin-bottom:0;flex:1;min-width:120px}
+
+/* Config banner */
+.config-banner{background:var(--warning-light);border:1px solid var(--accent);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;text-align:center}
+.config-banner h3{color:var(--warning);margin-bottom:8px}
+.config-banner code{background:rgba(0,0,0,.06);padding:2px 6px;border-radius:4px;font-size:.85rem}
+
+/* Section spacing */
+.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.section-grid.full{grid-template-columns:1fr}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:500;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .menu-toggle{display:block}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .section-grid{grid-template-columns:1fr}
+  .quick-form .form-inline{flex-direction:column}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .content{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 32 32"><ellipse cx="16" cy="18" rx="10" ry="13" fill="#F9A825"/><ellipse cx="16" cy="16" rx="8" ry="11" fill="#FDD835"/></svg>
+      <div><h1>Granja Huevos</h1><small>Sistema de Control</small></div>
+    </div>
+    <nav class="sidebar-nav" id="nav">
+      <button class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 20 20"><path d="M10 2L2 7v11h6v-6h4v6h6V7l-8-5z"/></svg>Dashboard
+      </button>
+      <button class="nav-item" data-page="produccion">
+        <svg viewBox="0 0 20 20"><ellipse cx="10" cy="11" rx="6" ry="8"/></svg>Produccion
+      </button>
+      <button class="nav-item" data-page="pedidos">
+        <svg viewBox="0 0 20 20"><path d="M3 3h14l-2 9H5L3 3zm3 13a2 2 0 104 0 2 2 0 00-4 0zm8 0a2 2 0 104 0 2 2 0 00-4 0z"/></svg>Pedidos
+      </button>
+      <button class="nav-item" data-page="stock">
+        <svg viewBox="0 0 20 20"><path d="M2 4h16v3H2zm1 4h14v9H3z"/></svg>Stock
+      </button>
+      <button class="nav-item" data-page="compras">
+        <svg viewBox="0 0 20 20"><path d="M4 4h12l1 12H3zm2-2h8v2H6z"/></svg>Compras
+      </button>
+      <button class="nav-item" data-page="gastos">
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#1B5E20" font-weight="bold">S/</text></svg>Gastos
+      </button>
+      <button class="nav-item" data-page="clientes">
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="6" r="4"/><path d="M2 18c0-4 4-7 8-7s8 3 8 7z"/></svg>Clientes
+      </button>
+      <button class="nav-item" data-page="lotes">
+        <svg viewBox="0 0 20 20"><path d="M10 2c-2 0-3 1-3 2 0 2 1 3 3 4 2-1 3-2 3-4 0-1-1-2-3-2zm-5 8c-1.5 0-2.5 3-2.5 5s1 3 2.5 3 2.5-1 2.5-3-1-5-2.5-5zm10 0c-1.5 0-2.5 3-2.5 5s1 3 2.5 3 2.5-1 2.5-3-1-5-2.5-5z"/></svg>Lotes
+      </button>
+    </nav>
+    <div class="sidebar-footer">Granja de Huevos v1.0</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+        </button>
+        <h2 id="page-title">Dashboard</h2>
+      </div>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-title"></h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ============================================================
+// CONFIGURACION — Pon aqui tu URL y anon key de Supabase
+// ============================================================
+const SUPABASE_URL = 'https://evdqxycbvbwxspfqaqlg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_KsJ9_QGCpwCdESwRQD6GiQ_TUDst98k';
+
+const PRECIO_UNIDAD = 0.80;
+const HUEVOS_POR_JABA = 30;
+const PRECIO_JABA = PRECIO_UNIDAD * HUEVOS_POR_JABA;
+
+// ============================================================
+// SUPABASE CLIENT
+// ============================================================
+let db = null;
+let isConnected = false;
+
+function initSupabase() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+  try {
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    isConnected = true;
+    return true;
+  } catch (e) {
+    console.error('Error conectando a Supabase:', e);
+    return false;
+  }
+}
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function formatMoney(n) {
+  return 'S/ ' + Number(n || 0).toFixed(2);
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function toJabas(units) {
+  const j = Math.floor(units / HUEVOS_POR_JABA);
+  const r = units % HUEVOS_POR_JABA;
+  return j > 0 ? `${j} jaba${j > 1 ? 's' : ''}${r > 0 ? ' + ' + r + ' ud.' : ''}` : `${units} ud.`;
+}
+
+function openModal(title, bodyHtml, footHtml) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal-foot').innerHTML = footHtml;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function getFormData(formId) {
+  const form = document.getElementById(formId);
+  const data = {};
+  form.querySelectorAll('input,select,textarea').forEach(el => {
+    if (el.name) {
+      if (el.type === 'number') data[el.name] = el.value === '' ? null : Number(el.value);
+      else data[el.name] = el.value || null;
+    }
+  });
+  return data;
+}
+
+// ============================================================
+// ROUTER
+// ============================================================
+let currentPage = 'dashboard';
+
+document.getElementById('nav').addEventListener('click', e => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+  navigateTo(item.dataset.page);
+  document.getElementById('sidebar').classList.remove('open');
+});
+
+function navigateTo(page) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  const titles = {
+    dashboard: 'Dashboard', produccion: 'Produccion Diaria', pedidos: 'Pedidos',
+    stock: 'Stock', compras: 'Compras de Insumos', gastos: 'Gastos',
+    clientes: 'Clientes', lotes: 'Lotes de Gallinas'
+  };
+  document.getElementById('page-title').textContent = titles[page] || page;
+  renderPage(page);
+}
+
+async function renderPage(page) {
+  const c = document.getElementById('content');
+  const a = document.getElementById('topbar-actions');
+  a.innerHTML = '';
+
+  if (!isConnected) {
+    c.innerHTML = renderConfigBanner();
+    return;
+  }
+
+  switch (page) {
+    case 'dashboard': await renderDashboard(c, a); break;
+    case 'produccion': await renderProduccion(c, a); break;
+    case 'pedidos': await renderPedidos(c, a); break;
+    case 'stock': await renderStock(c, a); break;
+    case 'compras': await renderCompras(c, a); break;
+    case 'gastos': await renderGastos(c, a); break;
+    case 'clientes': await renderClientes(c, a); break;
+    case 'lotes': await renderLotes(c, a); break;
+  }
+}
+
+function renderConfigBanner() {
+  return `<div class="config-banner">
+    <h3>Configuracion Pendiente</h3>
+    <p>Abre <code>index.html</code> y completa las variables <code>SUPABASE_URL</code> y <code>SUPABASE_KEY</code> con los datos de tu proyecto Supabase.</p>
+    <p style="margin-top:12px">Luego ejecuta el archivo <code>supabase-schema.sql</code> en el SQL Editor de Supabase para crear las tablas.</p>
+    <br>
+    <p style="font-size:.85rem;color:var(--text-secondary)">Mientras tanto, puedes explorar la interfaz — los datos se cargaran al conectar.</p>
+  </div>`;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function renderDashboard(c, a) {
+  c.innerHTML = '<p style="color:var(--text-light)">Cargando...</p>';
+
+  const [stockRes, prodHoy, pedPend, ingMes, gasMes, compMes, prod30] = await Promise.all([
+    db.from('stock_actual').select('*').single(),
+    db.from('produccion_diaria').select('cantidad_huevos').eq('fecha', today()),
+    db.from('pedidos').select('total').eq('estado', 'pendiente'),
+    db.from('pedidos').select('total').eq('estado', 'entregado').gte('fecha_pedido', today().slice(0, 7) + '-01'),
+    db.from('gastos').select('monto').gte('fecha', today().slice(0, 7) + '-01'),
+    db.from('compras').select('total').gte('fecha', today().slice(0, 7) + '-01'),
+    db.from('produccion_diaria').select('fecha,cantidad_huevos').order('fecha', { ascending: true }).gte('fecha', new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0])
+  ]);
+
+  const stock = stockRes.data || { stock_disponible: 0, comprometido_pendiente: 0, total_producido_neto: 0, total_vendido: 0 };
+  const hoy = (prodHoy.data || []).reduce((s, r) => s + r.cantidad_huevos, 0);
+  const pendientes = pedPend.data || [];
+  const ingresos = (ingMes.data || []).reduce((s, r) => s + Number(r.total), 0);
+  const gastosTotal = (gasMes.data || []).reduce((s, r) => s + Number(r.monto), 0);
+  const comprasTotal = (compMes.data || []).reduce((s, r) => s + Number(r.total), 0);
+  const egresosTotal = gastosTotal + comprasTotal;
+
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Stock Disponible</div>
+        <div class="stat-value">${stock.stock_disponible || 0}</div>
+        <div class="stat-sub">${toJabas(stock.stock_disponible || 0)}</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-label">Produccion Hoy</div>
+        <div class="stat-value">${hoy}</div>
+        <div class="stat-sub">${toJabas(hoy)}</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-label">Pedidos Pendientes</div>
+        <div class="stat-value">${pendientes.length}</div>
+        <div class="stat-sub">${formatMoney(pendientes.reduce((s, r) => s + Number(r.total), 0))} por cobrar</div>
+      </div>
+      <div class="stat-card ${ingresos - egresosTotal >= 0 ? '' : 'danger'}">
+        <div class="stat-label">Balance del Mes</div>
+        <div class="stat-value">${formatMoney(ingresos - egresosTotal)}</div>
+        <div class="stat-sub">Ingresos ${formatMoney(ingresos)} — Egresos ${formatMoney(egresosTotal)}</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Produccion Ultimos 30 Dias</h3>
+      <canvas id="chart-prod"></canvas>
+    </div>
+  `;
+
+  drawBarChart('chart-prod', (prod30.data || []).map(r => ({
+    label: r.fecha.slice(5),
+    value: r.cantidad_huevos
+  })));
+}
+
+// ============================================================
+// PRODUCCION
+// ============================================================
+async function renderProduccion(c, a) {
+  a.innerHTML = '';
+
+  const lotes = (await db.from('lotes_gallinas').select('id,nombre').eq('activo', true)).data || [];
+  const loteOpts = lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('');
+
+  const { data: rows } = await db.from('produccion_diaria')
+    .select('*,lotes_gallinas(nombre)')
+    .order('fecha', { ascending: false })
+    .limit(60);
+
+  c.innerHTML = `
+    <div class="quick-form">
+      <h3>Registrar Produccion</h3>
+      <form id="frm-prod" class="form-inline" onsubmit="return false">
+        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${today()}" required></div>
+        <div class="form-group"><label>Huevos</label><input type="number" name="cantidad_huevos" min="0" required placeholder="0"></div>
+        <div class="form-group"><label>Rotos</label><input type="number" name="huevos_rotos" min="0" value="0"></div>
+        <div class="form-group"><label>Descartados</label><input type="number" name="huevos_descartados" min="0" value="0"></div>
+        <div class="form-group"><label>Lote</label><select name="lote_id"><option value="">— Sin lote —</option>${loteOpts}</select></div>
+        <div class="form-group"><label>Notas</label><input type="text" name="notas" placeholder="Opcional"></div>
+        <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="saveProduccion()">Guardar</button></div>
+      </form>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><h3>Historial de Produccion</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Fecha</th><th>Huevos</th><th>Rotos</th><th>Descart.</th><th>Neto</th><th>Lote</th><th>Notas</th><th></th></tr></thead>
+          <tbody>
+            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="8">Sin registros</td></tr>' : ''}
+            ${(rows || []).map(r => `<tr>
+              <td>${formatDate(r.fecha)}</td>
+              <td><strong>${r.cantidad_huevos}</strong></td>
+              <td>${r.huevos_rotos || 0}</td>
+              <td>${r.huevos_descartados || 0}</td>
+              <td>${r.cantidad_huevos - (r.huevos_rotos || 0) - (r.huevos_descartados || 0)}</td>
+              <td>${r.lotes_gallinas?.nombre || '—'}</td>
+              <td>${r.notas || '—'}</td>
+              <td><button class="btn-icon btn-sm" onclick="deleteProduccion('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function saveProduccion() {
+  const d = getFormData('frm-prod');
+  if (!d.fecha || d.cantidad_huevos == null) return toast('Completa fecha y cantidad', 'error');
+  d.huevos_rotos = d.huevos_rotos || 0;
+  d.huevos_descartados = d.huevos_descartados || 0;
+  if (!d.lote_id) delete d.lote_id;
+  const { error } = await db.from('produccion_diaria').insert(d);
+  if (error) return toast(error.message, 'error');
+  toast('Produccion registrada');
+  renderPage('produccion');
+}
+
+async function deleteProduccion(id) {
+  if (!confirm('Eliminar este registro?')) return;
+  await db.from('produccion_diaria').delete().eq('id', id);
+  toast('Eliminado');
+  renderPage('produccion');
+}
+
+// ============================================================
+// PEDIDOS
+// ============================================================
+async function renderPedidos(c, a) {
+  a.innerHTML = '<button class="btn btn-primary" onclick="openPedidoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Pedido</button>';
+
+  const { data: rows } = await db.from('pedidos')
+    .select('*,clientes(nombre)')
+    .order('fecha_pedido', { ascending: false })
+    .limit(60);
+
+  c.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Lista de Pedidos</h3>
+        <div class="table-filters">
+          <button class="btn btn-sm btn-outline filter-btn active" data-filter="todos" onclick="filterPedidos(this,'todos')">Todos</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-filter="pendiente" onclick="filterPedidos(this,'pendiente')">Pendientes</button>
+          <button class="btn btn-sm btn-outline filter-btn" data-filter="entregado" onclick="filterPedidos(this,'entregado')">Entregados</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Fecha</th><th>Cliente</th><th>Cantidad</th><th>P.Unit.</th><th>Total</th><th>Entrega</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="8">Sin pedidos</td></tr>' : ''}
+            ${(rows || []).map(r => `<tr data-estado="${r.estado}">
+              <td>${formatDate(r.fecha_pedido)}</td>
+              <td>${r.clientes?.nombre || r.cliente_nombre || '—'}</td>
+              <td>${r.cantidad_unidades} <small style="color:var(--text-light)">(${toJabas(r.cantidad_unidades)})</small></td>
+              <td>${formatMoney(r.precio_unitario)}</td>
+              <td><strong>${formatMoney(r.total)}</strong></td>
+              <td>${formatDate(r.fecha_entrega)}</td>
+              <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
+              <td style="white-space:nowrap">
+                ${r.estado === 'pendiente' ? `<button class="btn btn-sm btn-outline" onclick="marcarEntregado('${r.id}')">Entregar</button>` : ''}
+                <button class="btn-icon btn-sm" onclick="deletePedido('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function filterPedidos(btn, filter) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('tbody tr[data-estado]').forEach(row => {
+    row.style.display = (filter === 'todos' || row.dataset.estado === filter) ? '' : 'none';
+  });
+}
+
+async function openPedidoForm(pedido) {
+  const clientes = (await db.from('clientes').select('id,nombre').eq('activo', true).order('nombre')).data || [];
+  const clienteOpts = clientes.map(cl => `<option value="${cl.id}" ${pedido?.cliente_id === cl.id ? 'selected' : ''}>${cl.nombre}</option>`).join('');
+
+  openModal(pedido ? 'Editar Pedido' : 'Nuevo Pedido', `
+    <form id="frm-pedido">
+      <div class="form-row">
+        <div class="form-group"><label>Cliente</label>
+          <select name="cliente_id"><option value="">— Seleccionar o escribir —</option>${clienteOpts}</select>
+        </div>
+        <div class="form-group"><label>O nombre directo</label>
+          <input type="text" name="cliente_nombre" value="${pedido?.cliente_nombre || ''}" placeholder="Si no esta en la lista">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha Pedido</label><input type="date" name="fecha_pedido" value="${pedido?.fecha_pedido || today()}" required></div>
+        <div class="form-group"><label>Fecha Entrega</label><input type="date" name="fecha_entrega" value="${pedido?.fecha_entrega || ''}"></div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group"><label>Cantidad (unidades)</label><input type="number" name="cantidad_unidades" min="1" value="${pedido?.cantidad_unidades || ''}" required></div>
+        <div class="form-group"><label>Precio Unitario (S/)</label><input type="number" name="precio_unitario" step="0.01" value="${pedido?.precio_unitario || PRECIO_UNIDAD}"></div>
+        <div class="form-group"><label>Estado</label>
+          <select name="estado">
+            <option value="pendiente" ${(!pedido || pedido.estado === 'pendiente') ? 'selected' : ''}>Pendiente</option>
+            <option value="entregado" ${pedido?.estado === 'entregado' ? 'selected' : ''}>Entregado</option>
+            <option value="cancelado" ${pedido?.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${pedido?.notas || ''}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="savePedido(${pedido ? `'${pedido.id}'` : 'null'})">Guardar</button>
+  `);
+}
+
+async function savePedido(id) {
+  const d = getFormData('frm-pedido');
+  if (!d.cantidad_unidades) return toast('Indica la cantidad', 'error');
+  if (!d.cliente_id) delete d.cliente_id;
+  if (id) {
+    const { error } = await db.from('pedidos').update(d).eq('id', id);
+    if (error) return toast(error.message, 'error');
+  } else {
+    const { error } = await db.from('pedidos').insert(d);
+    if (error) return toast(error.message, 'error');
+  }
+  closeModal();
+  toast('Pedido guardado');
+  renderPage('pedidos');
+}
+
+async function marcarEntregado(id) {
+  if (!confirm('Marcar como entregado?')) return;
+  await db.from('pedidos').update({ estado: 'entregado', fecha_entrega: today() }).eq('id', id);
+  toast('Pedido entregado');
+  renderPage('pedidos');
+}
+
+async function deletePedido(id) {
+  if (!confirm('Eliminar este pedido?')) return;
+  await db.from('pedidos').delete().eq('id', id);
+  toast('Eliminado');
+  renderPage('pedidos');
+}
+
+// ============================================================
+// STOCK
+// ============================================================
+async function renderStock(c) {
+  const { data: stock } = await db.from('stock_actual').select('*').single();
+  const s = stock || { stock_disponible: 0, total_producido_neto: 0, total_vendido: 0, comprometido_pendiente: 0 };
+
+  const libre = s.stock_disponible - s.comprometido_pendiente;
+
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Produccion Neta Total</div>
+        <div class="stat-value">${s.total_producido_neto}</div>
+        <div class="stat-sub">${toJabas(s.total_producido_neto)}</div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-label">Total Vendido</div>
+        <div class="stat-value">${s.total_vendido}</div>
+        <div class="stat-sub">${toJabas(s.total_vendido)}</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-label">Stock Disponible</div>
+        <div class="stat-value">${s.stock_disponible}</div>
+        <div class="stat-sub">${toJabas(s.stock_disponible)}</div>
+      </div>
+      <div class="stat-card ${libre < 0 ? 'danger' : ''}">
+        <div class="stat-label">Libre (menos comprometidos)</div>
+        <div class="stat-value">${libre}</div>
+        <div class="stat-sub">${s.comprometido_pendiente} comprometidos en pedidos pendientes</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Detalle</h3>
+      <p style="color:var(--text-secondary);font-size:.9rem">
+        El stock se calcula automaticamente: <strong>Produccion Neta</strong> (huevos - rotos - descartados) menos <strong>Pedidos Entregados</strong>.
+        Los pedidos pendientes aparecen como "comprometidos" pero aun cuentan en el stock disponible hasta que se marcan como entregados.
+      </p>
+    </div>
+  `;
+}
+
+// ============================================================
+// COMPRAS
+// ============================================================
+async function renderCompras(c, a) {
+  a.innerHTML = '<button class="btn btn-primary" onclick="openCompraForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nueva Compra</button>';
+
+  const { data: rows } = await db.from('compras').select('*').order('fecha', { ascending: false }).limit(60);
+
+  const cats = {};
+  (rows || []).forEach(r => { cats[r.categoria] = (cats[r.categoria] || 0) + Number(r.total); });
+
+  c.innerHTML = `
+    <div class="stats-grid">
+      ${Object.entries(cats).map(([cat, total]) => `
+        <div class="stat-card"><div class="stat-label">${cat}</div><div class="stat-value">${formatMoney(total)}</div></div>
+      `).join('')}
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><h3>Historial de Compras</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Cant.</th><th>Unidad</th><th>P.Unit.</th><th>Total</th><th>Categoria</th><th></th></tr></thead>
+          <tbody>
+            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="9">Sin compras</td></tr>' : ''}
+            ${(rows || []).map(r => `<tr>
+              <td>${formatDate(r.fecha)}</td>
+              <td>${r.concepto}</td>
+              <td>${r.proveedor || '—'}</td>
+              <td>${r.cantidad || '—'}</td>
+              <td>${r.unidad || '—'}</td>
+              <td>${r.precio_unitario ? formatMoney(r.precio_unitario) : '—'}</td>
+              <td><strong>${formatMoney(r.total)}</strong></td>
+              <td><span class="badge" style="background:var(--surface-alt);color:var(--text)">${r.categoria}</span></td>
+              <td><button class="btn-icon btn-sm" onclick="deleteCompra('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function openCompraForm(compra) {
+  const categorias = ['alimento', 'medicinas', 'equipamiento', 'limpieza', 'transporte', 'otro'];
+  openModal(compra ? 'Editar Compra' : 'Nueva Compra', `
+    <form id="frm-compra">
+      <div class="form-row">
+        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${compra?.fecha || today()}" required></div>
+        <div class="form-group"><label>Categoria</label>
+          <select name="categoria">${categorias.map(c => `<option value="${c}" ${compra?.categoria === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-group"><label>Concepto</label><input type="text" name="concepto" value="${compra?.concepto || ''}" required placeholder="Ej: Saco de alimento balanceado"></div>
+      <div class="form-group"><label>Proveedor</label><input type="text" name="proveedor" value="${compra?.proveedor || ''}" placeholder="Opcional"></div>
+      <div class="form-row-3">
+        <div class="form-group"><label>Cantidad</label><input type="number" name="cantidad" step="0.01" value="${compra?.cantidad || ''}"></div>
+        <div class="form-group"><label>Unidad</label><input type="text" name="unidad" value="${compra?.unidad || ''}" placeholder="kg, saco, litro..."></div>
+        <div class="form-group"><label>Precio Unitario</label><input type="number" name="precio_unitario" step="0.01" value="${compra?.precio_unitario || ''}"></div>
+      </div>
+      <div class="form-group"><label>Total (S/)</label><input type="number" name="total" step="0.01" value="${compra?.total || ''}" required></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${compra?.notas || ''}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveCompra(${compra ? `'${compra.id}'` : 'null'})">Guardar</button>
+  `);
+}
+
+async function saveCompra(id) {
+  const d = getFormData('frm-compra');
+  if (!d.concepto || !d.total) return toast('Completa concepto y total', 'error');
+  if (id) {
+    const { error } = await db.from('compras').update(d).eq('id', id);
+    if (error) return toast(error.message, 'error');
+  } else {
+    const { error } = await db.from('compras').insert(d);
+    if (error) return toast(error.message, 'error');
+  }
+  closeModal();
+  toast('Compra guardada');
+  renderPage('compras');
+}
+
+async function deleteCompra(id) {
+  if (!confirm('Eliminar esta compra?')) return;
+  await db.from('compras').delete().eq('id', id);
+  toast('Eliminado');
+  renderPage('compras');
+}
+
+// ============================================================
+// GASTOS
+// ============================================================
+async function renderGastos(c, a) {
+  a.innerHTML = '<button class="btn btn-primary" onclick="openGastoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Gasto</button>';
+
+  const { data: rows } = await db.from('gastos').select('*').order('fecha', { ascending: false }).limit(60);
+
+  const cats = {};
+  (rows || []).forEach(r => { cats[r.categoria] = (cats[r.categoria] || 0) + Number(r.monto); });
+  const totalGastos = Object.values(cats).reduce((s, v) => s + v, 0);
+
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card danger"><div class="stat-label">Total Gastos</div><div class="stat-value">${formatMoney(totalGastos)}</div></div>
+      ${Object.entries(cats).map(([cat, total]) => `
+        <div class="stat-card"><div class="stat-label">${cat}</div><div class="stat-value">${formatMoney(total)}</div></div>
+      `).join('')}
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><h3>Historial de Gastos</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Categoria</th><th>Notas</th><th></th></tr></thead>
+          <tbody>
+            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="6">Sin gastos</td></tr>' : ''}
+            ${(rows || []).map(r => `<tr>
+              <td>${formatDate(r.fecha)}</td>
+              <td>${r.concepto}</td>
+              <td><strong>${formatMoney(r.monto)}</strong></td>
+              <td><span class="badge" style="background:var(--surface-alt);color:var(--text)">${r.categoria}</span></td>
+              <td>${r.notas || '—'}</td>
+              <td><button class="btn-icon btn-sm" onclick="deleteGasto('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function openGastoForm(gasto) {
+  const categorias = ['luz', 'agua', 'transporte', 'mano_de_obra', 'veterinario', 'mantenimiento', 'operativo', 'otro'];
+  openModal(gasto ? 'Editar Gasto' : 'Nuevo Gasto', `
+    <form id="frm-gasto">
+      <div class="form-row">
+        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${gasto?.fecha || today()}" required></div>
+        <div class="form-group"><label>Categoria</label>
+          <select name="categoria">${categorias.map(c => `<option value="${c}" ${gasto?.categoria === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="form-group"><label>Concepto</label><input type="text" name="concepto" value="${gasto?.concepto || ''}" required placeholder="Ej: Recibo de luz del galpon"></div>
+      <div class="form-group"><label>Monto (S/)</label><input type="number" name="monto" step="0.01" value="${gasto?.monto || ''}" required></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${gasto?.notas || ''}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveGasto(${gasto ? `'${gasto.id}'` : 'null'})">Guardar</button>
+  `);
+}
+
+async function saveGasto(id) {
+  const d = getFormData('frm-gasto');
+  if (!d.concepto || !d.monto) return toast('Completa concepto y monto', 'error');
+  if (id) {
+    const { error } = await db.from('gastos').update(d).eq('id', id);
+    if (error) return toast(error.message, 'error');
+  } else {
+    const { error } = await db.from('gastos').insert(d);
+    if (error) return toast(error.message, 'error');
+  }
+  closeModal();
+  toast('Gasto guardado');
+  renderPage('gastos');
+}
+
+async function deleteGasto(id) {
+  if (!confirm('Eliminar este gasto?')) return;
+  await db.from('gastos').delete().eq('id', id);
+  toast('Eliminado');
+  renderPage('gastos');
+}
+
+// ============================================================
+// CLIENTES
+// ============================================================
+async function renderClientes(c, a) {
+  a.innerHTML = '<button class="btn btn-primary" onclick="openClienteForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Cliente</button>';
+
+  const { data: rows } = await db.from('clientes').select('*').order('nombre');
+
+  c.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-header"><h3>Lista de Clientes</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Nombre</th><th>Telefono</th><th>Direccion</th><th>Notas</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="6">Sin clientes</td></tr>' : ''}
+            ${(rows || []).map(r => `<tr>
+              <td><strong>${r.nombre}</strong></td>
+              <td>${r.telefono || '—'}</td>
+              <td>${r.direccion || '—'}</td>
+              <td>${r.notas || '—'}</td>
+              <td><span class="badge ${r.activo ? 'badge-entregado' : 'badge-cancelado'}">${r.activo ? 'Activo' : 'Inactivo'}</span></td>
+              <td style="white-space:nowrap">
+                <button class="btn-icon btn-sm" onclick="editCliente('${r.id}')" title="Editar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
+                <button class="btn-icon btn-sm" onclick="deleteCliente('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function openClienteForm(cliente) {
+  openModal(cliente ? 'Editar Cliente' : 'Nuevo Cliente', `
+    <form id="frm-cliente">
+      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${cliente?.nombre || ''}" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Telefono</label><input type="tel" name="telefono" value="${cliente?.telefono || ''}"></div>
+        <div class="form-group"><label>Direccion</label><input type="text" name="direccion" value="${cliente?.direccion || ''}"></div>
+      </div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${cliente?.notas || ''}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveCliente(${cliente ? `'${cliente.id}'` : 'null'})">Guardar</button>
+  `);
+}
+
+async function editCliente(id) {
+  const { data } = await db.from('clientes').select('*').eq('id', id).single();
+  if (data) openClienteForm(data);
+}
+
+async function saveCliente(id) {
+  const d = getFormData('frm-cliente');
+  if (!d.nombre) return toast('El nombre es obligatorio', 'error');
+  if (id) {
+    const { error } = await db.from('clientes').update(d).eq('id', id);
+    if (error) return toast(error.message, 'error');
+  } else {
+    const { error } = await db.from('clientes').insert(d);
+    if (error) return toast(error.message, 'error');
+  }
+  closeModal();
+  toast('Cliente guardado');
+  renderPage('clientes');
+}
+
+async function deleteCliente(id) {
+  if (!confirm('Eliminar este cliente?')) return;
+  await db.from('clientes').delete().eq('id', id);
+  toast('Eliminado');
+  renderPage('clientes');
+}
+
+// ============================================================
+// LOTES DE GALLINAS
+// ============================================================
+async function renderLotes(c, a) {
+  a.innerHTML = '<button class="btn btn-primary" onclick="openLoteForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Lote</button>';
+
+  const { data: rows } = await db.from('lotes_gallinas').select('*').order('created_at', { ascending: false });
+
+  c.innerHTML = `
+    <div class="table-wrap">
+      <div class="table-header"><h3>Lotes de Gallinas</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Nombre</th><th>Cant. Inicial</th><th>Cant. Actual</th><th>Raza</th><th>Ingreso</th><th>Edad Ingreso</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="8">Sin lotes registrados</td></tr>' : ''}
+            ${(rows || []).map(r => `<tr>
+              <td><strong>${r.nombre}</strong></td>
+              <td>${r.cantidad_inicial}</td>
+              <td>${r.cantidad_actual}</td>
+              <td>${r.raza || '—'}</td>
+              <td>${formatDate(r.fecha_ingreso)}</td>
+              <td>${r.edad_semanas_ingreso ? r.edad_semanas_ingreso + ' sem.' : '—'}</td>
+              <td><span class="badge ${r.activo ? 'badge-entregado' : 'badge-cancelado'}">${r.activo ? 'Activo' : 'Inactivo'}</span></td>
+              <td style="white-space:nowrap">
+                <button class="btn-icon btn-sm" onclick="editLote('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
+                <button class="btn-icon btn-sm" onclick="deleteLote('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+async function openLoteForm(lote) {
+  openModal(lote ? 'Editar Lote' : 'Nuevo Lote', `
+    <form id="frm-lote">
+      <div class="form-group"><label>Nombre del Lote</label><input type="text" name="nombre" value="${lote?.nombre || ''}" required placeholder="Ej: Lote 1 - Hy-Line"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Cantidad Inicial</label><input type="number" name="cantidad_inicial" min="1" value="${lote?.cantidad_inicial || ''}" required></div>
+        <div class="form-group"><label>Cantidad Actual</label><input type="number" name="cantidad_actual" min="0" value="${lote?.cantidad_actual || ''}" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Raza</label><input type="text" name="raza" value="${lote?.raza || ''}" placeholder="Ej: Hy-Line Brown"></div>
+        <div class="form-group"><label>Fecha Ingreso</label><input type="date" name="fecha_ingreso" value="${lote?.fecha_ingreso || today()}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Edad al Ingreso (semanas)</label><input type="number" name="edad_semanas_ingreso" min="0" value="${lote?.edad_semanas_ingreso || ''}"></div>
+        <div class="form-group"><label>Estado</label>
+          <select name="activo">
+            <option value="true" ${lote?.activo !== false ? 'selected' : ''}>Activo</option>
+            <option value="false" ${lote?.activo === false ? 'selected' : ''}>Inactivo</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${lote?.notas || ''}</textarea></div>
+    </form>
+  `, `
+    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveLote(${lote ? `'${lote.id}'` : 'null'})">Guardar</button>
+  `);
+}
+
+async function editLote(id) {
+  const { data } = await db.from('lotes_gallinas').select('*').eq('id', id).single();
+  if (data) openLoteForm(data);
+}
+
+async function saveLote(id) {
+  const d = getFormData('frm-lote');
+  if (!d.nombre || d.cantidad_inicial == null) return toast('Nombre y cantidad son obligatorios', 'error');
+  d.activo = d.activo === 'true';
+  if (id) {
+    const { error } = await db.from('lotes_gallinas').update(d).eq('id', id);
+    if (error) return toast(error.message, 'error');
+  } else {
+    const { error } = await db.from('lotes_gallinas').insert(d);
+    if (error) return toast(error.message, 'error');
+  }
+  closeModal();
+  toast('Lote guardado');
+  renderPage('lotes');
+}
+
+async function deleteLote(id) {
+  if (!confirm('Eliminar este lote?')) return;
+  await db.from('lotes_gallinas').delete().eq('id', id);
+  toast('Eliminado');
+  renderPage('lotes');
+}
+
+// ============================================================
+// CHART — barra simple con Canvas
+// ============================================================
+function drawBarChart(canvasId, data) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !data.length) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const w = rect.width, h = rect.height;
+  const pad = { top: 10, right: 10, bottom: 30, left: 40 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const max = Math.max(...data.map(d => d.value), 1);
+  const barW = Math.max(2, (cw / data.length) - 2);
+
+  ctx.clearRect(0, 0, w, h);
+
+  ctx.strokeStyle = '#E0E0D8';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + ch - (ch * i / 4);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+    ctx.fillStyle = '#8A8A9E';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(max * i / 4), pad.left - 4, y + 3);
+  }
+
+  data.forEach((d, i) => {
+    const x = pad.left + (i * (cw / data.length)) + 1;
+    const barH = (d.value / max) * ch;
+    const y = pad.top + ch - barH;
+
+    const gradient = ctx.createLinearGradient(x, y, x, pad.top + ch);
+    gradient.addColorStop(0, '#4CAF50');
+    gradient.addColorStop(1, '#81C784');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, barW, barH);
+
+    if (data.length <= 31) {
+      ctx.save();
+      ctx.fillStyle = '#8A8A9E';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.translate(x + barW / 2, h - 4);
+      ctx.rotate(-Math.PI / 4);
+      ctx.fillText(d.label, 0, 0);
+      ctx.restore();
+    }
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initSupabase();
+navigateTo('dashboard');
+</script>
+</body>
+</html>
