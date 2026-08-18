@@ -3,134 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Granja de Huevos — Control</title>
+<title>Juanita & su Gallo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --primary:#2E7D32;--primary-light:#4CAF50;--primary-dark:#1B5E20;
-  --accent:#F9A825;--accent-light:#FFF8E1;
-  --bg:#F5F5F0;--surface:#FFF;--surface-alt:#FAFAF7;
-  --text:#1A1A2E;--text-secondary:#5A5A6E;--text-light:#8A8A9E;
-  --border:#E0E0D8;--danger:#D32F2F;--danger-light:#FFEBEE;
-  --success:#2E7D32;--success-light:#E8F5E9;
-  --warning:#F57F17;--warning-light:#FFF8E1;
-  --info:#1565C0;--info-light:#E3F2FD;
-  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-lg:0 4px 12px rgba(0,0,0,.12);
-  --radius:8px;--radius-lg:12px;
-  --sidebar-w:240px;
-  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --tinta:#101822;--tinta-light:#1a2535;--tinta-lighter:#243044;
+  --cyan-300:#6CDAE5;--cyan-400:#33C3D4;--cyan-500:#199FAC;--cyan-600:#0D7A85;--cyan-700:#065A63;
+  --orange-300:#F0A360;--orange-400:#F08020;--orange-500:#D3680C;--orange-600:#A85000;
+  --bg:#F0F4F8;--surface:#FFF;--surface-alt:#F7F9FB;
+  --text:#101822;--text-secondary:#4A5568;--text-light:#8A94A6;
+  --border:#E2E8F0;--border-light:#EDF2F7;
+  --danger:#E53E3E;--danger-light:#FFF5F5;
+  --success:#199FAC;--success-light:#E6FFFA;
+  --warning:#F08020;--warning-light:#FFFAF0;
+  --info:#199FAC;--info-light:#E6FFFA;
+  --shadow:0 1px 3px rgba(16,24,34,.06),0 1px 2px rgba(16,24,34,.04);
+  --shadow-md:0 4px 6px rgba(16,24,34,.07),0 2px 4px rgba(16,24,34,.04);
+  --shadow-lg:0 10px 25px rgba(16,24,34,.1),0 4px 10px rgba(16,24,34,.05);
+  --radius:10px;--radius-lg:14px;--radius-xl:20px;
+  --sidebar-w:260px;
+  --font-head:'Poppins',sans-serif;--font-body:'Inter',-apple-system,sans-serif;
 }
-html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text)}
-a{color:var(--primary);text-decoration:none}
-button{cursor:pointer;font-family:var(--font)}
-input,select,textarea{font-family:var(--font);font-size:.9rem}
+html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+a{color:var(--cyan-500);text-decoration:none}
+button{cursor:pointer;font-family:var(--font-body)}
+input,select,textarea{font-family:var(--font-body);font-size:.9rem}
+h1,h2,h3,h4{font-family:var(--font-head)}
 
 /* Layout */
 .app{display:flex;height:100vh;overflow:hidden}
-.sidebar{width:var(--sidebar-w);background:var(--primary-dark);color:#fff;display:flex;flex-direction:column;flex-shrink:0;transition:transform .3s}
-.sidebar-header{padding:20px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px}
-.sidebar-header svg{width:32px;height:32px;fill:var(--accent)}
-.sidebar-header h1{font-size:1.1rem;font-weight:600;line-height:1.2}
-.sidebar-header small{font-size:.7rem;opacity:.7;display:block}
-.sidebar-nav{flex:1;padding:8px 0;overflow-y:auto}
-.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;color:rgba(255,255,255,.8);font-size:.9rem;transition:all .15s;border:none;background:none;width:100%;text-align:left}
-.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
-.nav-item.active{background:rgba(255,255,255,.15);color:#fff;font-weight:600;border-right:3px solid var(--accent)}
-.nav-item svg{width:20px;height:20px;fill:currentColor;flex-shrink:0}
-.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);font-size:.75rem;opacity:.5;text-align:center}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,var(--tinta) 0%,var(--tinta-light) 100%);color:#fff;display:flex;flex-direction:column;flex-shrink:0;transition:transform .3s}
+.sidebar-header{padding:24px 20px;border-bottom:1px solid rgba(108,218,229,.1);display:flex;align-items:center;gap:14px}
+.sidebar-logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--cyan-400),var(--orange-400));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sidebar-logo svg{width:28px;height:28px}
+.sidebar-header h1{font-size:1.05rem;font-weight:700;line-height:1.3;font-family:var(--font-head)}
+.sidebar-header h1 span{color:var(--orange-300)}
+.sidebar-header small{font-size:.65rem;color:var(--cyan-300);display:block;font-weight:400;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.6);font-size:.875rem;font-weight:500;transition:all .2s;border:none;background:none;width:100%;text-align:left;border-left:3px solid transparent;font-family:var(--font-body)}
+.nav-item:hover{background:rgba(108,218,229,.08);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(108,218,229,.12);color:#fff;font-weight:600;border-left-color:var(--cyan-400)}
+.nav-item svg{width:20px;height:20px;fill:currentColor;flex-shrink:0;opacity:.7}
+.nav-item.active svg{opacity:1}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(108,218,229,.1);text-align:center}
+.sidebar-footer .jaba-ref{font-size:.7rem;color:var(--orange-300);font-weight:600;letter-spacing:.3px}
+.sidebar-footer .jaba-ref span{color:var(--cyan-300)}
+.sidebar-footer small{display:block;font-size:.65rem;color:rgba(255,255,255,.3);margin-top:6px}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.topbar h2{font-size:1.25rem;font-weight:600}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.topbar h2{font-size:1.2rem;font-weight:700;color:var(--tinta)}
 .topbar-actions{display:flex;gap:8px}
-.content{flex:1;overflow-y:auto;padding:24px}
+.content{flex:1;overflow-y:auto;padding:28px}
 .menu-toggle{display:none;background:none;border:none;padding:8px;color:var(--text)}
 .menu-toggle svg{width:24px;height:24px}
 
-/* Cards & Stats */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
-.stat-card{background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
-.stat-card.accent{border-left-color:var(--accent)}
-.stat-card.danger{border-left-color:var(--danger)}
-.stat-card.info{border-left-color:var(--info)}
-.stat-label{font-size:.8rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.stat-value{font-size:1.8rem;font-weight:700;line-height:1.2}
-.stat-sub{font-size:.8rem;color:var(--text-light);margin-top:4px}
+/* Stat Cards */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan-400),var(--cyan-500))}
+.stat-card.accent::before{background:linear-gradient(90deg,var(--orange-300),var(--orange-400))}
+.stat-card.danger::before{background:var(--danger)}
+.stat-card.info::before{background:linear-gradient(90deg,var(--cyan-300),var(--cyan-500))}
+.stat-label{font-size:.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:600}
+.stat-value{font-size:2rem;font-weight:800;line-height:1.1;font-family:var(--font-head);color:var(--tinta)}
+.stat-sub{font-size:.8rem;color:var(--text-secondary);margin-top:6px;display:flex;align-items:center;gap:4px}
+.stat-jaba{display:inline-flex;align-items:center;gap:4px;background:var(--warning-light);color:var(--orange-500);padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:600}
 
 /* Tables */
 .table-wrap{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
-.table-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
-.table-header h3{font-size:1rem;font-weight:600}
-.table-filters{display:flex;gap:8px;flex-wrap:wrap}
+.table-header{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.table-header h3{font-size:1rem;font-weight:700;color:var(--tinta)}
+.table-filters{display:flex;gap:6px;flex-wrap:wrap}
 .table-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.875rem}
-th{text-align:left;padding:12px 16px;background:var(--surface-alt);font-weight:600;color:var(--text-secondary);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid var(--border)}
-td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:hover td{background:var(--surface-alt)}
-.empty-row td{text-align:center;color:var(--text-light);padding:40px 16px;font-style:italic}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:12px 16px;background:var(--surface-alt);font-weight:600;color:var(--text-light);font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:11px 16px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+tr:hover td{background:rgba(108,218,229,.03)}
+.empty-row td{text-align:center;color:var(--text-light);padding:48px 16px;font-style:italic}
 
 /* Badges */
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
-.badge-pendiente{background:var(--warning-light);color:var(--warning)}
-.badge-entregado{background:var(--success-light);color:var(--success)}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.3px}
+.badge-pendiente{background:var(--warning-light);color:var(--orange-500)}
+.badge-entregado{background:var(--success-light);color:var(--cyan-600)}
 .badge-cancelado{background:var(--danger-light);color:var(--danger)}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:.875rem;font-weight:500;border:1px solid transparent;transition:all .15s}
-.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
-.btn-accent{background:var(--accent);color:#000}.btn-accent:hover{background:#e09100}
-.btn-outline{background:transparent;color:var(--primary);border-color:var(--border)}.btn-outline:hover{background:var(--surface-alt)}
-.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b71c1c}
-.btn-sm{padding:5px 10px;font-size:.8rem}
-.btn-icon{padding:6px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--text-secondary)}.btn-icon:hover{background:var(--surface-alt);color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius);font-size:.85rem;font-weight:600;border:1px solid transparent;transition:all .2s}
+.btn-primary{background:var(--cyan-500);color:#fff}.btn-primary:hover{background:var(--cyan-600);box-shadow:0 2px 8px rgba(25,159,172,.3)}
+.btn-cta{background:var(--orange-400);color:var(--tinta);font-weight:700}.btn-cta:hover{background:var(--orange-500);color:#fff;box-shadow:0 2px 8px rgba(240,128,32,.3)}
+.btn-outline{background:transparent;color:var(--cyan-500);border-color:var(--border)}.btn-outline:hover{background:var(--info-light);border-color:var(--cyan-400)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#c53030}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+.btn-icon{padding:6px;border-radius:8px;background:none;border:1px solid var(--border-light);color:var(--text-light);transition:all .15s}.btn-icon:hover{background:var(--info-light);color:var(--cyan-500);border-color:var(--cyan-400)}
 .btn svg{width:16px;height:16px;fill:currentColor}
 
 /* Forms */
 .form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text-secondary);margin-bottom:4px}
+.form-group label{display:block;font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:5px;letter-spacing:.3px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 input[type="text"],input[type="number"],input[type="date"],input[type="tel"],select,textarea{
-  width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:.9rem;background:var(--surface);transition:border-color .15s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(46,125,50,.15)}
+  width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;background:var(--surface);transition:all .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan-400);box-shadow:0 0 0 3px rgba(108,218,229,.15)}
 textarea{resize:vertical;min-height:60px}
-.input-sm{padding:6px 10px;font-size:.8rem}
 
 /* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(16,24,34,.5);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column}
-.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.modal-head h3{font-size:1.05rem;font-weight:600}
-.modal-close{background:none;border:none;font-size:1.3rem;color:var(--text-light);padding:4px 8px}
-.modal-body{padding:20px;overflow-y:auto;flex:1}
-.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.modal{background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:1.05rem;font-weight:700;font-family:var(--font-head);color:var(--tinta)}
+.modal-close{background:none;border:none;font-size:1.4rem;color:var(--text-light);padding:4px 8px;transition:color .15s}.modal-close:hover{color:var(--danger)}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
 
 /* Toast */
 .toast-container{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:.875rem;font-weight:500;box-shadow:var(--shadow-lg);animation:slideIn .3s ease}
-.toast-success{background:var(--success)}.toast-error{background:var(--danger)}.toast-info{background:var(--info)}
+.toast{padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:.85rem;font-weight:600;box-shadow:var(--shadow-lg);animation:slideIn .3s ease}
+.toast-success{background:var(--cyan-600)}.toast-error{background:var(--danger)}.toast-info{background:var(--cyan-500)}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
 /* Chart */
-.chart-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;margin-bottom:24px}
-.chart-card h3{font-size:1rem;font-weight:600;margin-bottom:16px}
-canvas{width:100%!important;height:200px!important}
+.chart-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px;margin-bottom:28px}
+.chart-card h3{font-size:1rem;font-weight:700;margin-bottom:4px;color:var(--tinta)}
+.chart-card .chart-sub{font-size:.78rem;color:var(--text-light);margin-bottom:16px}
+canvas{width:100%!important;height:220px!important}
 
 /* Quick form */
-.quick-form{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;margin-bottom:24px}
-.quick-form h3{font-size:1rem;font-weight:600;margin-bottom:16px}
+.quick-form{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px;margin-bottom:24px;border-top:3px solid var(--cyan-400)}
+.quick-form h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--tinta)}
 .quick-form .form-inline{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
 .quick-form .form-inline .form-group{margin-bottom:0;flex:1;min-width:120px}
 
 /* Config banner */
-.config-banner{background:var(--warning-light);border:1px solid var(--accent);border-radius:var(--radius-lg);padding:20px;margin-bottom:24px;text-align:center}
-.config-banner h3{color:var(--warning);margin-bottom:8px}
-.config-banner code{background:rgba(0,0,0,.06);padding:2px 6px;border-radius:4px;font-size:.85rem}
+.config-banner{background:linear-gradient(135deg,var(--tinta),var(--tinta-light));border-radius:var(--radius-xl);padding:32px;margin-bottom:24px;text-align:center;color:#fff}
+.config-banner h3{color:var(--orange-300);margin-bottom:12px;font-size:1.2rem}
+.config-banner p{color:rgba(255,255,255,.7);line-height:1.6}
+.config-banner code{background:rgba(108,218,229,.15);color:var(--cyan-300);padding:2px 8px;border-radius:6px;font-size:.85rem}
 
-/* Section spacing */
-.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
-.section-grid.full{grid-template-columns:1fr}
+/* Info strip */
+.info-strip{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(108,218,229,.08),rgba(240,128,32,.06));border:1px solid rgba(108,218,229,.2);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:24px;flex-wrap:wrap}
+.info-strip .info-item{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--tinta)}
+.info-strip .info-item .num{color:var(--cyan-500);font-family:var(--font-head);font-size:1rem}
+.info-strip .info-item .label{color:var(--text-secondary);font-weight:400}
+.info-strip .divider{width:1px;height:24px;background:var(--border)}
 
 /* Responsive */
 @media(max-width:768px){
@@ -139,22 +159,33 @@ canvas{width:100%!important;height:200px!important}
   .menu-toggle{display:block}
   .stats-grid{grid-template-columns:1fr 1fr}
   .form-row,.form-row-3{grid-template-columns:1fr}
-  .section-grid{grid-template-columns:1fr}
   .quick-form .form-inline{flex-direction:column}
+  .content{padding:16px}
+  .info-strip .divider{display:none}
 }
 @media(max-width:480px){
   .stats-grid{grid-template-columns:1fr}
-  .content{padding:16px}
 }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <svg viewBox="0 0 32 32"><ellipse cx="16" cy="18" rx="10" ry="13" fill="#F9A825"/><ellipse cx="16" cy="16" rx="8" ry="11" fill="#FDD835"/></svg>
-      <div><h1>Granja Huevos</h1><small>Sistema de Control</small></div>
+      <div class="sidebar-logo">
+        <svg viewBox="0 0 32 32" fill="none">
+          <ellipse cx="16" cy="20" rx="8" ry="10" fill="#FFF8E1"/>
+          <ellipse cx="16" cy="19" rx="6.5" ry="8.5" fill="#FFE082"/>
+          <path d="M14 10c0-2 1-4 2-4s2 2 2 4" fill="#E53E3E"/>
+          <path d="M13 10.5c-.5-.5-1.5-.3-1.5.5s1 1 1.5.5z" fill="#E53E3E"/>
+          <path d="M19 10.5c.5-.5 1.5-.3 1.5.5s-1 1-1.5.5z" fill="#E53E3E"/>
+          <circle cx="14" cy="14" r="1" fill="#101822"/>
+          <circle cx="18" cy="14" r="1" fill="#101822"/>
+          <path d="M15 16.5c0 .3.5.5 1 .5s1-.2 1-.5" stroke="#F08020" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <path d="M14.5 17.5l16 18" stroke="#F08020" stroke-width=".8" fill="none"/>
+        </svg>
+      </div>
+      <div><h1>Juanita <span>&</span> su Gallo</h1><small>Control Avicola</small></div>
     </div>
     <nav class="sidebar-nav" id="nav">
       <button class="nav-item active" data-page="dashboard">
@@ -173,7 +204,7 @@ canvas{width:100%!important;height:200px!important}
         <svg viewBox="0 0 20 20"><path d="M4 4h12l1 12H3zm2-2h8v2H6z"/></svg>Compras
       </button>
       <button class="nav-item" data-page="gastos">
-        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#1B5E20" font-weight="bold">S/</text></svg>Gastos
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#101822" font-weight="bold">S/</text></svg>Gastos
       </button>
       <button class="nav-item" data-page="clientes">
         <svg viewBox="0 0 20 20"><circle cx="10" cy="6" r="4"/><path d="M2 18c0-4 4-7 8-7s8 3 8 7z"/></svg>Clientes
@@ -182,10 +213,12 @@ canvas{width:100%!important;height:200px!important}
         <svg viewBox="0 0 20 20"><path d="M10 2c-2 0-3 1-3 2 0 2 1 3 3 4 2-1 3-2 3-4 0-1-1-2-3-2zm-5 8c-1.5 0-2.5 3-2.5 5s1 3 2.5 3 2.5-1 2.5-3-1-5-2.5-5zm10 0c-1.5 0-2.5 3-2.5 5s1 3 2.5 3 2.5-1 2.5-3-1-5-2.5-5z"/></svg>Lotes
       </button>
     </nav>
-    <div class="sidebar-footer">Granja de Huevos v1.0</div>
+    <div class="sidebar-footer">
+      <div class="jaba-ref">1 Jaba = <span>30</span> Huevos &bull; S/0.80/ud</div>
+      <small>Juanita & su Gallo v2.0</small>
+    </div>
   </aside>
 
-  <!-- Main -->
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:12px">
@@ -200,7 +233,6 @@ canvas{width:100%!important;height:200px!important}
   </div>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-head"><h3 id="modal-title"></h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
@@ -209,13 +241,9 @@ canvas{width:100%!important;height:200px!important}
   </div>
 </div>
 
-<!-- Toast container -->
 <div class="toast-container" id="toasts"></div>
 
 <script>
-// ============================================================
-// CONFIGURACION — Pon aqui tu URL y anon key de Supabase
-// ============================================================
 const SUPABASE_URL = 'https://evdqxycbvbwxspfqaqlg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_KsJ9_QGCpwCdESwRQD6GiQ_TUDst98k';
 
@@ -223,9 +251,6 @@ const PRECIO_UNIDAD = 0.80;
 const HUEVOS_POR_JABA = 30;
 const PRECIO_JABA = PRECIO_UNIDAD * HUEVOS_POR_JABA;
 
-// ============================================================
-// SUPABASE CLIENT
-// ============================================================
 let db = null;
 let isConnected = false;
 
@@ -241,9 +266,6 @@ function initSupabase() {
   }
 }
 
-// ============================================================
-// UTILIDADES
-// ============================================================
 function toast(msg, type = 'success') {
   const el = document.createElement('div');
   el.className = `toast toast-${type}`;
@@ -268,7 +290,18 @@ function today() {
 function toJabas(units) {
   const j = Math.floor(units / HUEVOS_POR_JABA);
   const r = units % HUEVOS_POR_JABA;
-  return j > 0 ? `${j} jaba${j > 1 ? 's' : ''}${r > 0 ? ' + ' + r + ' ud.' : ''}` : `${units} ud.`;
+  if (j > 0 && r > 0) return `${j} jaba${j > 1 ? 's' : ''} + ${r} ud.`;
+  if (j > 0) return `${j} jaba${j > 1 ? 's' : ''} exactas`;
+  return `${units} ud.`;
+}
+
+function jabasBadge(units) {
+  const j = Math.floor(units / HUEVOS_POR_JABA);
+  const r = units % HUEVOS_POR_JABA;
+  if (units === 0) return '';
+  let txt = j > 0 ? `${j} jaba${j > 1 ? 's' : ''}` : '';
+  if (r > 0) txt += (txt ? ' + ' : '') + `${r} ud.`;
+  return `<span class="stat-jaba">${txt}</span>`;
 }
 
 function openModal(title, bodyHtml, footHtml) {
@@ -294,9 +327,6 @@ function getFormData(formId) {
   return data;
 }
 
-// ============================================================
-// ROUTER
-// ============================================================
 let currentPage = 'dashboard';
 
 document.getElementById('nav').addEventListener('click', e => {
@@ -322,12 +352,7 @@ async function renderPage(page) {
   const c = document.getElementById('content');
   const a = document.getElementById('topbar-actions');
   a.innerHTML = '';
-
-  if (!isConnected) {
-    c.innerHTML = renderConfigBanner();
-    return;
-  }
-
+  if (!isConnected) { c.innerHTML = renderConfigBanner(); return; }
   switch (page) {
     case 'dashboard': await renderDashboard(c, a); break;
     case 'produccion': await renderProduccion(c, a); break;
@@ -343,16 +368,12 @@ async function renderPage(page) {
 function renderConfigBanner() {
   return `<div class="config-banner">
     <h3>Configuracion Pendiente</h3>
-    <p>Abre <code>index.html</code> y completa las variables <code>SUPABASE_URL</code> y <code>SUPABASE_KEY</code> con los datos de tu proyecto Supabase.</p>
-    <p style="margin-top:12px">Luego ejecuta el archivo <code>supabase-schema.sql</code> en el SQL Editor de Supabase para crear las tablas.</p>
-    <br>
-    <p style="font-size:.85rem;color:var(--text-secondary)">Mientras tanto, puedes explorar la interfaz — los datos se cargaran al conectar.</p>
+    <p>Abre <code>index.html</code> y completa <code>SUPABASE_URL</code> y <code>SUPABASE_KEY</code>.</p>
+    <p style="margin-top:12px">Ejecuta <code>supabase-schema.sql</code> en el SQL Editor de Supabase.</p>
   </div>`;
 }
 
-// ============================================================
-// DASHBOARD
-// ============================================================
+// ==================== DASHBOARD ====================
 async function renderDashboard(c, a) {
   c.innerHTML = '<p style="color:var(--text-light)">Cargando...</p>';
 
@@ -373,32 +394,41 @@ async function renderDashboard(c, a) {
   const gastosTotal = (gasMes.data || []).reduce((s, r) => s + Number(r.monto), 0);
   const comprasTotal = (compMes.data || []).reduce((s, r) => s + Number(r.total), 0);
   const egresosTotal = gastosTotal + comprasTotal;
+  const balance = ingresos - egresosTotal;
 
   c.innerHTML = `
+    <div class="info-strip">
+      <div class="info-item"><span class="num">1</span> jaba = <span class="num">30</span> <span class="label">huevos</span></div>
+      <div class="divider"></div>
+      <div class="info-item"><span class="label">Precio:</span> <span class="num">S/0.80</span> <span class="label">x ud.</span></div>
+      <div class="divider"></div>
+      <div class="info-item"><span class="label">Jaba:</span> <span class="num">S/24.00</span></div>
+    </div>
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Stock Disponible</div>
         <div class="stat-value">${stock.stock_disponible || 0}</div>
-        <div class="stat-sub">${toJabas(stock.stock_disponible || 0)}</div>
+        <div class="stat-sub">${jabasBadge(stock.stock_disponible || 0)}</div>
       </div>
       <div class="stat-card accent">
         <div class="stat-label">Produccion Hoy</div>
         <div class="stat-value">${hoy}</div>
-        <div class="stat-sub">${toJabas(hoy)}</div>
+        <div class="stat-sub">${jabasBadge(hoy)}</div>
       </div>
       <div class="stat-card info">
         <div class="stat-label">Pedidos Pendientes</div>
         <div class="stat-value">${pendientes.length}</div>
         <div class="stat-sub">${formatMoney(pendientes.reduce((s, r) => s + Number(r.total), 0))} por cobrar</div>
       </div>
-      <div class="stat-card ${ingresos - egresosTotal >= 0 ? '' : 'danger'}">
+      <div class="stat-card ${balance >= 0 ? '' : 'danger'}">
         <div class="stat-label">Balance del Mes</div>
-        <div class="stat-value">${formatMoney(ingresos - egresosTotal)}</div>
-        <div class="stat-sub">Ingresos ${formatMoney(ingresos)} — Egresos ${formatMoney(egresosTotal)}</div>
+        <div class="stat-value" style="color:${balance >= 0 ? 'var(--cyan-600)' : 'var(--danger)'}">${formatMoney(balance)}</div>
+        <div class="stat-sub">Ingresos ${formatMoney(ingresos)} &mdash; Egresos ${formatMoney(egresosTotal)}</div>
       </div>
     </div>
     <div class="chart-card">
       <h3>Produccion Ultimos 30 Dias</h3>
+      <div class="chart-sub">Huevos producidos por dia &bull; Las etiquetas muestran la cantidad exacta</div>
       <canvas id="chart-prod"></canvas>
     </div>
   `;
@@ -409,19 +439,15 @@ async function renderDashboard(c, a) {
   })));
 }
 
-// ============================================================
-// PRODUCCION
-// ============================================================
+// ==================== PRODUCCION ====================
 async function renderProduccion(c, a) {
   a.innerHTML = '';
-
   const lotes = (await db.from('lotes_gallinas').select('id,nombre').eq('activo', true)).data || [];
   const loteOpts = lotes.map(l => `<option value="${l.id}">${l.nombre}</option>`).join('');
 
   const { data: rows } = await db.from('produccion_diaria')
     .select('*,lotes_gallinas(nombre)')
-    .order('fecha', { ascending: false })
-    .limit(60);
+    .order('fecha', { ascending: false }).limit(60);
 
   c.innerHTML = `
     <div class="quick-form">
@@ -433,29 +459,28 @@ async function renderProduccion(c, a) {
         <div class="form-group"><label>Descartados</label><input type="number" name="huevos_descartados" min="0" value="0"></div>
         <div class="form-group"><label>Lote</label><select name="lote_id"><option value="">— Sin lote —</option>${loteOpts}</select></div>
         <div class="form-group"><label>Notas</label><input type="text" name="notas" placeholder="Opcional"></div>
-        <div class="form-group"><label>&nbsp;</label><button class="btn btn-primary" onclick="saveProduccion()">Guardar</button></div>
+        <div class="form-group"><label>&nbsp;</label><button class="btn btn-cta" onclick="saveProduccion()">Guardar</button></div>
       </form>
     </div>
     <div class="table-wrap">
       <div class="table-header"><h3>Historial de Produccion</h3></div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Fecha</th><th>Huevos</th><th>Rotos</th><th>Descart.</th><th>Neto</th><th>Lote</th><th>Notas</th><th></th></tr></thead>
-          <tbody>
-            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="8">Sin registros</td></tr>' : ''}
-            ${(rows || []).map(r => `<tr>
-              <td>${formatDate(r.fecha)}</td>
-              <td><strong>${r.cantidad_huevos}</strong></td>
-              <td>${r.huevos_rotos || 0}</td>
-              <td>${r.huevos_descartados || 0}</td>
-              <td>${r.cantidad_huevos - (r.huevos_rotos || 0) - (r.huevos_descartados || 0)}</td>
-              <td>${r.lotes_gallinas?.nombre || '—'}</td>
-              <td>${r.notas || '—'}</td>
-              <td><button class="btn-icon btn-sm" onclick="deleteProduccion('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Fecha</th><th>Huevos</th><th>Jabas</th><th>Rotos</th><th>Descart.</th><th>Neto</th><th>Lote</th><th>Notas</th><th></th></tr></thead>
+        <tbody>
+          ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="9">Sin registros</td></tr>':''}
+          ${(rows||[]).map(r=>{const neto=r.cantidad_huevos-(r.huevos_rotos||0)-(r.huevos_descartados||0);return`<tr>
+            <td>${formatDate(r.fecha)}</td>
+            <td><strong>${r.cantidad_huevos}</strong></td>
+            <td>${jabasBadge(r.cantidad_huevos)}</td>
+            <td>${r.huevos_rotos||0}</td>
+            <td>${r.huevos_descartados||0}</td>
+            <td><strong>${neto}</strong></td>
+            <td>${r.lotes_gallinas?.nombre||'—'}</td>
+            <td>${r.notas||'—'}</td>
+            <td><button class="btn-icon btn-sm" onclick="deleteProduccion('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
+          </tr>`}).join('')}
+        </tbody>
+      </table></div>
     </div>
   `;
 }
@@ -479,48 +504,44 @@ async function deleteProduccion(id) {
   renderPage('produccion');
 }
 
-// ============================================================
-// PEDIDOS
-// ============================================================
+// ==================== PEDIDOS ====================
 async function renderPedidos(c, a) {
-  a.innerHTML = '<button class="btn btn-primary" onclick="openPedidoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Pedido</button>';
+  a.innerHTML = '<button class="btn btn-cta" onclick="openPedidoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Pedido</button>';
 
   const { data: rows } = await db.from('pedidos')
     .select('*,clientes(nombre)')
-    .order('fecha_pedido', { ascending: false })
-    .limit(60);
+    .order('fecha_pedido', { ascending: false }).limit(60);
 
   c.innerHTML = `
     <div class="table-wrap">
       <div class="table-header">
         <h3>Lista de Pedidos</h3>
         <div class="table-filters">
-          <button class="btn btn-sm btn-outline filter-btn active" data-filter="todos" onclick="filterPedidos(this,'todos')">Todos</button>
-          <button class="btn btn-sm btn-outline filter-btn" data-filter="pendiente" onclick="filterPedidos(this,'pendiente')">Pendientes</button>
-          <button class="btn btn-sm btn-outline filter-btn" data-filter="entregado" onclick="filterPedidos(this,'entregado')">Entregados</button>
+          <button class="btn btn-sm btn-outline filter-btn active" onclick="filterPedidos(this,'todos')">Todos</button>
+          <button class="btn btn-sm btn-outline filter-btn" onclick="filterPedidos(this,'pendiente')">Pendientes</button>
+          <button class="btn btn-sm btn-outline filter-btn" onclick="filterPedidos(this,'entregado')">Entregados</button>
         </div>
       </div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Fecha</th><th>Cliente</th><th>Cantidad</th><th>P.Unit.</th><th>Total</th><th>Entrega</th><th>Estado</th><th></th></tr></thead>
-          <tbody>
-            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="8">Sin pedidos</td></tr>' : ''}
-            ${(rows || []).map(r => `<tr data-estado="${r.estado}">
-              <td>${formatDate(r.fecha_pedido)}</td>
-              <td>${r.clientes?.nombre || r.cliente_nombre || '—'}</td>
-              <td>${r.cantidad_unidades} <small style="color:var(--text-light)">(${toJabas(r.cantidad_unidades)})</small></td>
-              <td>${formatMoney(r.precio_unitario)}</td>
-              <td><strong>${formatMoney(r.total)}</strong></td>
-              <td>${formatDate(r.fecha_entrega)}</td>
-              <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
-              <td style="white-space:nowrap">
-                ${r.estado === 'pendiente' ? `<button class="btn btn-sm btn-outline" onclick="marcarEntregado('${r.id}')">Entregar</button>` : ''}
-                <button class="btn-icon btn-sm" onclick="deletePedido('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Fecha</th><th>Cliente</th><th>Cantidad</th><th>Jabas</th><th>P.Unit.</th><th>Total</th><th>Entrega</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="9">Sin pedidos</td></tr>':''}
+          ${(rows||[]).map(r=>`<tr data-estado="${r.estado}">
+            <td>${formatDate(r.fecha_pedido)}</td>
+            <td>${r.clientes?.nombre||r.cliente_nombre||'—'}</td>
+            <td><strong>${r.cantidad_unidades}</strong></td>
+            <td>${jabasBadge(r.cantidad_unidades)}</td>
+            <td>${formatMoney(r.precio_unitario)}</td>
+            <td><strong>${formatMoney(r.total)}</strong></td>
+            <td>${formatDate(r.fecha_entrega)}</td>
+            <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
+            <td style="white-space:nowrap">
+              ${r.estado==='pendiente'?`<button class="btn btn-sm btn-primary" onclick="marcarEntregado('${r.id}')">Entregar</button>`:''}
+              <button class="btn-icon btn-sm" onclick="deletePedido('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
     </div>
   `;
 }
@@ -535,334 +556,232 @@ function filterPedidos(btn, filter) {
 
 async function openPedidoForm(pedido) {
   const clientes = (await db.from('clientes').select('id,nombre').eq('activo', true).order('nombre')).data || [];
-  const clienteOpts = clientes.map(cl => `<option value="${cl.id}" ${pedido?.cliente_id === cl.id ? 'selected' : ''}>${cl.nombre}</option>`).join('');
+  const clienteOpts = clientes.map(cl => `<option value="${cl.id}" ${pedido?.cliente_id===cl.id?'selected':''}>${cl.nombre}</option>`).join('');
 
   openModal(pedido ? 'Editar Pedido' : 'Nuevo Pedido', `
     <form id="frm-pedido">
       <div class="form-row">
-        <div class="form-group"><label>Cliente</label>
-          <select name="cliente_id"><option value="">— Seleccionar o escribir —</option>${clienteOpts}</select>
-        </div>
-        <div class="form-group"><label>O nombre directo</label>
-          <input type="text" name="cliente_nombre" value="${pedido?.cliente_nombre || ''}" placeholder="Si no esta en la lista">
-        </div>
+        <div class="form-group"><label>Cliente</label><select name="cliente_id"><option value="">— Seleccionar —</option>${clienteOpts}</select></div>
+        <div class="form-group"><label>O nombre directo</label><input type="text" name="cliente_nombre" value="${pedido?.cliente_nombre||''}" placeholder="Si no esta en la lista"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Fecha Pedido</label><input type="date" name="fecha_pedido" value="${pedido?.fecha_pedido || today()}" required></div>
-        <div class="form-group"><label>Fecha Entrega</label><input type="date" name="fecha_entrega" value="${pedido?.fecha_entrega || ''}"></div>
+        <div class="form-group"><label>Fecha Pedido</label><input type="date" name="fecha_pedido" value="${pedido?.fecha_pedido||today()}" required></div>
+        <div class="form-group"><label>Fecha Entrega</label><input type="date" name="fecha_entrega" value="${pedido?.fecha_entrega||''}"></div>
       </div>
       <div class="form-row-3">
-        <div class="form-group"><label>Cantidad (unidades)</label><input type="number" name="cantidad_unidades" min="1" value="${pedido?.cantidad_unidades || ''}" required></div>
-        <div class="form-group"><label>Precio Unitario (S/)</label><input type="number" name="precio_unitario" step="0.01" value="${pedido?.precio_unitario || PRECIO_UNIDAD}"></div>
-        <div class="form-group"><label>Estado</label>
-          <select name="estado">
-            <option value="pendiente" ${(!pedido || pedido.estado === 'pendiente') ? 'selected' : ''}>Pendiente</option>
-            <option value="entregado" ${pedido?.estado === 'entregado' ? 'selected' : ''}>Entregado</option>
-            <option value="cancelado" ${pedido?.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
-          </select>
-        </div>
+        <div class="form-group"><label>Cantidad (unidades)</label><input type="number" name="cantidad_unidades" min="1" value="${pedido?.cantidad_unidades||''}" required></div>
+        <div class="form-group"><label>Precio Unitario (S/)</label><input type="number" name="precio_unitario" step="0.01" value="${pedido?.precio_unitario||PRECIO_UNIDAD}"></div>
+        <div class="form-group"><label>Estado</label><select name="estado">
+          <option value="pendiente" ${(!pedido||pedido.estado==='pendiente')?'selected':''}>Pendiente</option>
+          <option value="entregado" ${pedido?.estado==='entregado'?'selected':''}>Entregado</option>
+          <option value="cancelado" ${pedido?.estado==='cancelado'?'selected':''}>Cancelado</option>
+        </select></div>
       </div>
-      <div class="form-group"><label>Notas</label><textarea name="notas">${pedido?.notas || ''}</textarea></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${pedido?.notas||''}</textarea></div>
     </form>
-  `, `
-    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="savePedido(${pedido ? `'${pedido.id}'` : 'null'})">Guardar</button>
-  `);
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="savePedido(${pedido?`'${pedido.id}'`:'null'})">Guardar</button>`);
 }
 
 async function savePedido(id) {
   const d = getFormData('frm-pedido');
   if (!d.cantidad_unidades) return toast('Indica la cantidad', 'error');
   if (!d.cliente_id) delete d.cliente_id;
-  if (id) {
-    const { error } = await db.from('pedidos').update(d).eq('id', id);
-    if (error) return toast(error.message, 'error');
-  } else {
-    const { error } = await db.from('pedidos').insert(d);
-    if (error) return toast(error.message, 'error');
-  }
-  closeModal();
-  toast('Pedido guardado');
-  renderPage('pedidos');
+  const { error } = id ? await db.from('pedidos').update(d).eq('id', id) : await db.from('pedidos').insert(d);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Pedido guardado'); renderPage('pedidos');
 }
 
 async function marcarEntregado(id) {
   if (!confirm('Marcar como entregado?')) return;
   await db.from('pedidos').update({ estado: 'entregado', fecha_entrega: today() }).eq('id', id);
-  toast('Pedido entregado');
-  renderPage('pedidos');
+  toast('Pedido entregado'); renderPage('pedidos');
 }
 
 async function deletePedido(id) {
   if (!confirm('Eliminar este pedido?')) return;
   await db.from('pedidos').delete().eq('id', id);
-  toast('Eliminado');
-  renderPage('pedidos');
+  toast('Eliminado'); renderPage('pedidos');
 }
 
-// ============================================================
-// STOCK
-// ============================================================
+// ==================== STOCK ====================
 async function renderStock(c) {
   const { data: stock } = await db.from('stock_actual').select('*').single();
   const s = stock || { stock_disponible: 0, total_producido_neto: 0, total_vendido: 0, comprometido_pendiente: 0 };
-
   const libre = s.stock_disponible - s.comprometido_pendiente;
 
   c.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Produccion Neta Total</div>
-        <div class="stat-value">${s.total_producido_neto}</div>
-        <div class="stat-sub">${toJabas(s.total_producido_neto)}</div>
-      </div>
-      <div class="stat-card accent">
-        <div class="stat-label">Total Vendido</div>
-        <div class="stat-value">${s.total_vendido}</div>
-        <div class="stat-sub">${toJabas(s.total_vendido)}</div>
-      </div>
-      <div class="stat-card info">
-        <div class="stat-label">Stock Disponible</div>
-        <div class="stat-value">${s.stock_disponible}</div>
-        <div class="stat-sub">${toJabas(s.stock_disponible)}</div>
-      </div>
-      <div class="stat-card ${libre < 0 ? 'danger' : ''}">
-        <div class="stat-label">Libre (menos comprometidos)</div>
-        <div class="stat-value">${libre}</div>
-        <div class="stat-sub">${s.comprometido_pendiente} comprometidos en pedidos pendientes</div>
-      </div>
+    <div class="info-strip">
+      <div class="info-item"><span class="num">1</span> jaba = <span class="num">30</span> <span class="label">huevos</span></div>
+      <div class="divider"></div>
+      <div class="info-item"><span class="label">Stock se calcula:</span> Produccion Neta &minus; Pedidos Entregados</div>
     </div>
-    <div class="chart-card">
-      <h3>Detalle</h3>
-      <p style="color:var(--text-secondary);font-size:.9rem">
-        El stock se calcula automaticamente: <strong>Produccion Neta</strong> (huevos - rotos - descartados) menos <strong>Pedidos Entregados</strong>.
-        Los pedidos pendientes aparecen como "comprometidos" pero aun cuentan en el stock disponible hasta que se marcan como entregados.
-      </p>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Produccion Neta Total</div><div class="stat-value">${s.total_producido_neto}</div><div class="stat-sub">${jabasBadge(s.total_producido_neto)}</div></div>
+      <div class="stat-card accent"><div class="stat-label">Total Vendido</div><div class="stat-value">${s.total_vendido}</div><div class="stat-sub">${jabasBadge(s.total_vendido)}</div></div>
+      <div class="stat-card info"><div class="stat-label">Stock Disponible</div><div class="stat-value">${s.stock_disponible}</div><div class="stat-sub">${jabasBadge(s.stock_disponible)}</div></div>
+      <div class="stat-card ${libre<0?'danger':''}"><div class="stat-label">Libre (- comprometidos)</div><div class="stat-value">${libre}</div><div class="stat-sub">${s.comprometido_pendiente} en pedidos pendientes</div></div>
     </div>
   `;
 }
 
-// ============================================================
-// COMPRAS
-// ============================================================
+// ==================== COMPRAS ====================
 async function renderCompras(c, a) {
-  a.innerHTML = '<button class="btn btn-primary" onclick="openCompraForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nueva Compra</button>';
-
+  a.innerHTML = '<button class="btn btn-cta" onclick="openCompraForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nueva Compra</button>';
   const { data: rows } = await db.from('compras').select('*').order('fecha', { ascending: false }).limit(60);
-
-  const cats = {};
-  (rows || []).forEach(r => { cats[r.categoria] = (cats[r.categoria] || 0) + Number(r.total); });
+  const cats = {}; (rows||[]).forEach(r => { cats[r.categoria] = (cats[r.categoria]||0) + Number(r.total); });
 
   c.innerHTML = `
-    <div class="stats-grid">
-      ${Object.entries(cats).map(([cat, total]) => `
-        <div class="stat-card"><div class="stat-label">${cat}</div><div class="stat-value">${formatMoney(total)}</div></div>
-      `).join('')}
-    </div>
+    <div class="stats-grid">${Object.entries(cats).map(([cat,total])=>`<div class="stat-card"><div class="stat-label">${cat}</div><div class="stat-value">${formatMoney(total)}</div></div>`).join('')}</div>
     <div class="table-wrap">
       <div class="table-header"><h3>Historial de Compras</h3></div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Cant.</th><th>Unidad</th><th>P.Unit.</th><th>Total</th><th>Categoria</th><th></th></tr></thead>
-          <tbody>
-            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="9">Sin compras</td></tr>' : ''}
-            ${(rows || []).map(r => `<tr>
-              <td>${formatDate(r.fecha)}</td>
-              <td>${r.concepto}</td>
-              <td>${r.proveedor || '—'}</td>
-              <td>${r.cantidad || '—'}</td>
-              <td>${r.unidad || '—'}</td>
-              <td>${r.precio_unitario ? formatMoney(r.precio_unitario) : '—'}</td>
-              <td><strong>${formatMoney(r.total)}</strong></td>
-              <td><span class="badge" style="background:var(--surface-alt);color:var(--text)">${r.categoria}</span></td>
-              <td><button class="btn-icon btn-sm" onclick="deleteCompra('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Fecha</th><th>Concepto</th><th>Proveedor</th><th>Cant.</th><th>Unidad</th><th>P.Unit.</th><th>Total</th><th>Categoria</th><th></th></tr></thead>
+        <tbody>
+          ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="9">Sin compras</td></tr>':''}
+          ${(rows||[]).map(r=>`<tr>
+            <td>${formatDate(r.fecha)}</td><td>${r.concepto}</td><td>${r.proveedor||'—'}</td>
+            <td>${r.cantidad||'—'}</td><td>${r.unidad||'—'}</td>
+            <td>${r.precio_unitario?formatMoney(r.precio_unitario):'—'}</td>
+            <td><strong>${formatMoney(r.total)}</strong></td>
+            <td><span class="badge" style="background:var(--surface-alt);color:var(--text)">${r.categoria}</span></td>
+            <td><button class="btn-icon btn-sm" onclick="deleteCompra('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
     </div>
   `;
 }
 
 async function openCompraForm(compra) {
-  const categorias = ['alimento', 'medicinas', 'equipamiento', 'limpieza', 'transporte', 'otro'];
-  openModal(compra ? 'Editar Compra' : 'Nueva Compra', `
+  const categorias = ['alimento','medicinas','equipamiento','limpieza','transporte','otro'];
+  openModal(compra?'Editar Compra':'Nueva Compra', `
     <form id="frm-compra">
       <div class="form-row">
-        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${compra?.fecha || today()}" required></div>
-        <div class="form-group"><label>Categoria</label>
-          <select name="categoria">${categorias.map(c => `<option value="${c}" ${compra?.categoria === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
-        </div>
+        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${compra?.fecha||today()}" required></div>
+        <div class="form-group"><label>Categoria</label><select name="categoria">${categorias.map(c=>`<option value="${c}" ${compra?.categoria===c?'selected':''}>${c}</option>`).join('')}</select></div>
       </div>
-      <div class="form-group"><label>Concepto</label><input type="text" name="concepto" value="${compra?.concepto || ''}" required placeholder="Ej: Saco de alimento balanceado"></div>
-      <div class="form-group"><label>Proveedor</label><input type="text" name="proveedor" value="${compra?.proveedor || ''}" placeholder="Opcional"></div>
+      <div class="form-group"><label>Concepto</label><input type="text" name="concepto" value="${compra?.concepto||''}" required placeholder="Ej: Saco de alimento balanceado"></div>
+      <div class="form-group"><label>Proveedor</label><input type="text" name="proveedor" value="${compra?.proveedor||''}" placeholder="Opcional"></div>
       <div class="form-row-3">
-        <div class="form-group"><label>Cantidad</label><input type="number" name="cantidad" step="0.01" value="${compra?.cantidad || ''}"></div>
-        <div class="form-group"><label>Unidad</label><input type="text" name="unidad" value="${compra?.unidad || ''}" placeholder="kg, saco, litro..."></div>
-        <div class="form-group"><label>Precio Unitario</label><input type="number" name="precio_unitario" step="0.01" value="${compra?.precio_unitario || ''}"></div>
+        <div class="form-group"><label>Cantidad</label><input type="number" name="cantidad" step="0.01" value="${compra?.cantidad||''}"></div>
+        <div class="form-group"><label>Unidad</label><input type="text" name="unidad" value="${compra?.unidad||''}" placeholder="kg, saco..."></div>
+        <div class="form-group"><label>Precio Unitario</label><input type="number" name="precio_unitario" step="0.01" value="${compra?.precio_unitario||''}"></div>
       </div>
-      <div class="form-group"><label>Total (S/)</label><input type="number" name="total" step="0.01" value="${compra?.total || ''}" required></div>
-      <div class="form-group"><label>Notas</label><textarea name="notas">${compra?.notas || ''}</textarea></div>
+      <div class="form-group"><label>Total (S/)</label><input type="number" name="total" step="0.01" value="${compra?.total||''}" required></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${compra?.notas||''}</textarea></div>
     </form>
-  `, `
-    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveCompra(${compra ? `'${compra.id}'` : 'null'})">Guardar</button>
-  `);
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="saveCompra(${compra?`'${compra.id}'`:'null'})">Guardar</button>`);
 }
 
 async function saveCompra(id) {
   const d = getFormData('frm-compra');
-  if (!d.concepto || !d.total) return toast('Completa concepto y total', 'error');
-  if (id) {
-    const { error } = await db.from('compras').update(d).eq('id', id);
-    if (error) return toast(error.message, 'error');
-  } else {
-    const { error } = await db.from('compras').insert(d);
-    if (error) return toast(error.message, 'error');
-  }
-  closeModal();
-  toast('Compra guardada');
-  renderPage('compras');
+  if (!d.concepto||!d.total) return toast('Completa concepto y total', 'error');
+  const { error } = id ? await db.from('compras').update(d).eq('id', id) : await db.from('compras').insert(d);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Compra guardada'); renderPage('compras');
 }
 
 async function deleteCompra(id) {
   if (!confirm('Eliminar esta compra?')) return;
   await db.from('compras').delete().eq('id', id);
-  toast('Eliminado');
-  renderPage('compras');
+  toast('Eliminado'); renderPage('compras');
 }
 
-// ============================================================
-// GASTOS
-// ============================================================
+// ==================== GASTOS ====================
 async function renderGastos(c, a) {
-  a.innerHTML = '<button class="btn btn-primary" onclick="openGastoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Gasto</button>';
-
+  a.innerHTML = '<button class="btn btn-cta" onclick="openGastoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Gasto</button>';
   const { data: rows } = await db.from('gastos').select('*').order('fecha', { ascending: false }).limit(60);
-
-  const cats = {};
-  (rows || []).forEach(r => { cats[r.categoria] = (cats[r.categoria] || 0) + Number(r.monto); });
-  const totalGastos = Object.values(cats).reduce((s, v) => s + v, 0);
+  const cats = {}; (rows||[]).forEach(r => { cats[r.categoria] = (cats[r.categoria]||0) + Number(r.monto); });
+  const totalGastos = Object.values(cats).reduce((s,v) => s+v, 0);
 
   c.innerHTML = `
     <div class="stats-grid">
       <div class="stat-card danger"><div class="stat-label">Total Gastos</div><div class="stat-value">${formatMoney(totalGastos)}</div></div>
-      ${Object.entries(cats).map(([cat, total]) => `
-        <div class="stat-card"><div class="stat-label">${cat}</div><div class="stat-value">${formatMoney(total)}</div></div>
-      `).join('')}
+      ${Object.entries(cats).map(([cat,total])=>`<div class="stat-card"><div class="stat-label">${cat}</div><div class="stat-value">${formatMoney(total)}</div></div>`).join('')}
     </div>
     <div class="table-wrap">
       <div class="table-header"><h3>Historial de Gastos</h3></div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Categoria</th><th>Notas</th><th></th></tr></thead>
-          <tbody>
-            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="6">Sin gastos</td></tr>' : ''}
-            ${(rows || []).map(r => `<tr>
-              <td>${formatDate(r.fecha)}</td>
-              <td>${r.concepto}</td>
-              <td><strong>${formatMoney(r.monto)}</strong></td>
-              <td><span class="badge" style="background:var(--surface-alt);color:var(--text)">${r.categoria}</span></td>
-              <td>${r.notas || '—'}</td>
-              <td><button class="btn-icon btn-sm" onclick="deleteGasto('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th><th>Categoria</th><th>Notas</th><th></th></tr></thead>
+        <tbody>
+          ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="6">Sin gastos</td></tr>':''}
+          ${(rows||[]).map(r=>`<tr>
+            <td>${formatDate(r.fecha)}</td><td>${r.concepto}</td>
+            <td><strong>${formatMoney(r.monto)}</strong></td>
+            <td><span class="badge" style="background:var(--surface-alt);color:var(--text)">${r.categoria}</span></td>
+            <td>${r.notas||'—'}</td>
+            <td><button class="btn-icon btn-sm" onclick="deleteGasto('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
     </div>
   `;
 }
 
 async function openGastoForm(gasto) {
-  const categorias = ['luz', 'agua', 'transporte', 'mano_de_obra', 'veterinario', 'mantenimiento', 'operativo', 'otro'];
-  openModal(gasto ? 'Editar Gasto' : 'Nuevo Gasto', `
+  const categorias = ['luz','agua','transporte','mano_de_obra','veterinario','mantenimiento','operativo','otro'];
+  openModal(gasto?'Editar Gasto':'Nuevo Gasto', `
     <form id="frm-gasto">
       <div class="form-row">
-        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${gasto?.fecha || today()}" required></div>
-        <div class="form-group"><label>Categoria</label>
-          <select name="categoria">${categorias.map(c => `<option value="${c}" ${gasto?.categoria === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
-        </div>
+        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${gasto?.fecha||today()}" required></div>
+        <div class="form-group"><label>Categoria</label><select name="categoria">${categorias.map(c=>`<option value="${c}" ${gasto?.categoria===c?'selected':''}>${c}</option>`).join('')}</select></div>
       </div>
-      <div class="form-group"><label>Concepto</label><input type="text" name="concepto" value="${gasto?.concepto || ''}" required placeholder="Ej: Recibo de luz del galpon"></div>
-      <div class="form-group"><label>Monto (S/)</label><input type="number" name="monto" step="0.01" value="${gasto?.monto || ''}" required></div>
-      <div class="form-group"><label>Notas</label><textarea name="notas">${gasto?.notas || ''}</textarea></div>
+      <div class="form-group"><label>Concepto</label><input type="text" name="concepto" value="${gasto?.concepto||''}" required placeholder="Ej: Recibo de luz del galpon"></div>
+      <div class="form-group"><label>Monto (S/)</label><input type="number" name="monto" step="0.01" value="${gasto?.monto||''}" required></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${gasto?.notas||''}</textarea></div>
     </form>
-  `, `
-    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveGasto(${gasto ? `'${gasto.id}'` : 'null'})">Guardar</button>
-  `);
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="saveGasto(${gasto?`'${gasto.id}'`:'null'})">Guardar</button>`);
 }
 
 async function saveGasto(id) {
   const d = getFormData('frm-gasto');
-  if (!d.concepto || !d.monto) return toast('Completa concepto y monto', 'error');
-  if (id) {
-    const { error } = await db.from('gastos').update(d).eq('id', id);
-    if (error) return toast(error.message, 'error');
-  } else {
-    const { error } = await db.from('gastos').insert(d);
-    if (error) return toast(error.message, 'error');
-  }
-  closeModal();
-  toast('Gasto guardado');
-  renderPage('gastos');
+  if (!d.concepto||!d.monto) return toast('Completa concepto y monto', 'error');
+  const { error } = id ? await db.from('gastos').update(d).eq('id', id) : await db.from('gastos').insert(d);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Gasto guardado'); renderPage('gastos');
 }
 
 async function deleteGasto(id) {
   if (!confirm('Eliminar este gasto?')) return;
   await db.from('gastos').delete().eq('id', id);
-  toast('Eliminado');
-  renderPage('gastos');
+  toast('Eliminado'); renderPage('gastos');
 }
 
-// ============================================================
-// CLIENTES
-// ============================================================
+// ==================== CLIENTES ====================
 async function renderClientes(c, a) {
-  a.innerHTML = '<button class="btn btn-primary" onclick="openClienteForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Cliente</button>';
-
+  a.innerHTML = '<button class="btn btn-cta" onclick="openClienteForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Cliente</button>';
   const { data: rows } = await db.from('clientes').select('*').order('nombre');
 
-  c.innerHTML = `
-    <div class="table-wrap">
-      <div class="table-header"><h3>Lista de Clientes</h3></div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Nombre</th><th>Telefono</th><th>Direccion</th><th>Notas</th><th>Estado</th><th></th></tr></thead>
-          <tbody>
-            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="6">Sin clientes</td></tr>' : ''}
-            ${(rows || []).map(r => `<tr>
-              <td><strong>${r.nombre}</strong></td>
-              <td>${r.telefono || '—'}</td>
-              <td>${r.direccion || '—'}</td>
-              <td>${r.notas || '—'}</td>
-              <td><span class="badge ${r.activo ? 'badge-entregado' : 'badge-cancelado'}">${r.activo ? 'Activo' : 'Inactivo'}</span></td>
-              <td style="white-space:nowrap">
-                <button class="btn-icon btn-sm" onclick="editCliente('${r.id}')" title="Editar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
-                <button class="btn-icon btn-sm" onclick="deleteCliente('${r.id}')" title="Eliminar"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
+  c.innerHTML = `<div class="table-wrap">
+    <div class="table-header"><h3>Lista de Clientes</h3></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Nombre</th><th>Telefono</th><th>Direccion</th><th>Notas</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="6">Sin clientes</td></tr>':''}
+        ${(rows||[]).map(r=>`<tr>
+          <td><strong>${r.nombre}</strong></td><td>${r.telefono||'—'}</td><td>${r.direccion||'—'}</td><td>${r.notas||'—'}</td>
+          <td><span class="badge ${r.activo?'badge-entregado':'badge-cancelado'}">${r.activo?'Activo':'Inactivo'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn-icon btn-sm" onclick="editCliente('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
+            <button class="btn-icon btn-sm" onclick="deleteCliente('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
 }
 
 async function openClienteForm(cliente) {
-  openModal(cliente ? 'Editar Cliente' : 'Nuevo Cliente', `
+  openModal(cliente?'Editar Cliente':'Nuevo Cliente', `
     <form id="frm-cliente">
-      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${cliente?.nombre || ''}" required></div>
+      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${cliente?.nombre||''}" required></div>
       <div class="form-row">
-        <div class="form-group"><label>Telefono</label><input type="tel" name="telefono" value="${cliente?.telefono || ''}"></div>
-        <div class="form-group"><label>Direccion</label><input type="text" name="direccion" value="${cliente?.direccion || ''}"></div>
+        <div class="form-group"><label>Telefono</label><input type="tel" name="telefono" value="${cliente?.telefono||''}"></div>
+        <div class="form-group"><label>Direccion</label><input type="text" name="direccion" value="${cliente?.direccion||''}"></div>
       </div>
-      <div class="form-group"><label>Notas</label><textarea name="notas">${cliente?.notas || ''}</textarea></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${cliente?.notas||''}</textarea></div>
     </form>
-  `, `
-    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveCliente(${cliente ? `'${cliente.id}'` : 'null'})">Guardar</button>
-  `);
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="saveCliente(${cliente?`'${cliente.id}'`:'null'})">Guardar</button>`);
 }
 
 async function editCliente(id) {
@@ -873,88 +792,65 @@ async function editCliente(id) {
 async function saveCliente(id) {
   const d = getFormData('frm-cliente');
   if (!d.nombre) return toast('El nombre es obligatorio', 'error');
-  if (id) {
-    const { error } = await db.from('clientes').update(d).eq('id', id);
-    if (error) return toast(error.message, 'error');
-  } else {
-    const { error } = await db.from('clientes').insert(d);
-    if (error) return toast(error.message, 'error');
-  }
-  closeModal();
-  toast('Cliente guardado');
-  renderPage('clientes');
+  const { error } = id ? await db.from('clientes').update(d).eq('id', id) : await db.from('clientes').insert(d);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Cliente guardado'); renderPage('clientes');
 }
 
 async function deleteCliente(id) {
   if (!confirm('Eliminar este cliente?')) return;
   await db.from('clientes').delete().eq('id', id);
-  toast('Eliminado');
-  renderPage('clientes');
+  toast('Eliminado'); renderPage('clientes');
 }
 
-// ============================================================
-// LOTES DE GALLINAS
-// ============================================================
+// ==================== LOTES ====================
 async function renderLotes(c, a) {
-  a.innerHTML = '<button class="btn btn-primary" onclick="openLoteForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Lote</button>';
-
+  a.innerHTML = '<button class="btn btn-cta" onclick="openLoteForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Lote</button>';
   const { data: rows } = await db.from('lotes_gallinas').select('*').order('created_at', { ascending: false });
 
-  c.innerHTML = `
-    <div class="table-wrap">
-      <div class="table-header"><h3>Lotes de Gallinas</h3></div>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Nombre</th><th>Cant. Inicial</th><th>Cant. Actual</th><th>Raza</th><th>Ingreso</th><th>Edad Ingreso</th><th>Estado</th><th></th></tr></thead>
-          <tbody>
-            ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="8">Sin lotes registrados</td></tr>' : ''}
-            ${(rows || []).map(r => `<tr>
-              <td><strong>${r.nombre}</strong></td>
-              <td>${r.cantidad_inicial}</td>
-              <td>${r.cantidad_actual}</td>
-              <td>${r.raza || '—'}</td>
-              <td>${formatDate(r.fecha_ingreso)}</td>
-              <td>${r.edad_semanas_ingreso ? r.edad_semanas_ingreso + ' sem.' : '—'}</td>
-              <td><span class="badge ${r.activo ? 'badge-entregado' : 'badge-cancelado'}">${r.activo ? 'Activo' : 'Inactivo'}</span></td>
-              <td style="white-space:nowrap">
-                <button class="btn-icon btn-sm" onclick="editLote('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
-                <button class="btn-icon btn-sm" onclick="deleteLote('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
+  c.innerHTML = `<div class="table-wrap">
+    <div class="table-header"><h3>Lotes de Gallinas</h3></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Nombre</th><th>Cant. Inicial</th><th>Cant. Actual</th><th>Raza</th><th>Ingreso</th><th>Edad Ingreso</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="8">Sin lotes registrados</td></tr>':''}
+        ${(rows||[]).map(r=>`<tr>
+          <td><strong>${r.nombre}</strong></td><td>${r.cantidad_inicial}</td><td>${r.cantidad_actual}</td>
+          <td>${r.raza||'—'}</td><td>${formatDate(r.fecha_ingreso)}</td>
+          <td>${r.edad_semanas_ingreso?r.edad_semanas_ingreso+' sem.':'—'}</td>
+          <td><span class="badge ${r.activo?'badge-entregado':'badge-cancelado'}">${r.activo?'Activo':'Inactivo'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn-icon btn-sm" onclick="editLote('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
+            <button class="btn-icon btn-sm" onclick="deleteLote('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+  </div>`;
 }
 
 async function openLoteForm(lote) {
-  openModal(lote ? 'Editar Lote' : 'Nuevo Lote', `
+  openModal(lote?'Editar Lote':'Nuevo Lote', `
     <form id="frm-lote">
-      <div class="form-group"><label>Nombre del Lote</label><input type="text" name="nombre" value="${lote?.nombre || ''}" required placeholder="Ej: Lote 1 - Hy-Line"></div>
+      <div class="form-group"><label>Nombre del Lote</label><input type="text" name="nombre" value="${lote?.nombre||''}" required placeholder="Ej: Lote 1 - Hy-Line"></div>
       <div class="form-row">
-        <div class="form-group"><label>Cantidad Inicial</label><input type="number" name="cantidad_inicial" min="1" value="${lote?.cantidad_inicial || ''}" required></div>
-        <div class="form-group"><label>Cantidad Actual</label><input type="number" name="cantidad_actual" min="0" value="${lote?.cantidad_actual || ''}" required></div>
+        <div class="form-group"><label>Cantidad Inicial</label><input type="number" name="cantidad_inicial" min="1" value="${lote?.cantidad_inicial||''}" required></div>
+        <div class="form-group"><label>Cantidad Actual</label><input type="number" name="cantidad_actual" min="0" value="${lote?.cantidad_actual||''}" required></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Raza</label><input type="text" name="raza" value="${lote?.raza || ''}" placeholder="Ej: Hy-Line Brown"></div>
-        <div class="form-group"><label>Fecha Ingreso</label><input type="date" name="fecha_ingreso" value="${lote?.fecha_ingreso || today()}"></div>
+        <div class="form-group"><label>Raza</label><input type="text" name="raza" value="${lote?.raza||''}" placeholder="Ej: Hy-Line Brown"></div>
+        <div class="form-group"><label>Fecha Ingreso</label><input type="date" name="fecha_ingreso" value="${lote?.fecha_ingreso||today()}"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Edad al Ingreso (semanas)</label><input type="number" name="edad_semanas_ingreso" min="0" value="${lote?.edad_semanas_ingreso || ''}"></div>
-        <div class="form-group"><label>Estado</label>
-          <select name="activo">
-            <option value="true" ${lote?.activo !== false ? 'selected' : ''}>Activo</option>
-            <option value="false" ${lote?.activo === false ? 'selected' : ''}>Inactivo</option>
-          </select>
-        </div>
+        <div class="form-group"><label>Edad al Ingreso (semanas)</label><input type="number" name="edad_semanas_ingreso" min="0" value="${lote?.edad_semanas_ingreso||''}"></div>
+        <div class="form-group"><label>Estado</label><select name="activo">
+          <option value="true" ${lote?.activo!==false?'selected':''}>Activo</option>
+          <option value="false" ${lote?.activo===false?'selected':''}>Inactivo</option>
+        </select></div>
       </div>
-      <div class="form-group"><label>Notas</label><textarea name="notas">${lote?.notas || ''}</textarea></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${lote?.notas||''}</textarea></div>
     </form>
-  `, `
-    <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="saveLote(${lote ? `'${lote.id}'` : 'null'})">Guardar</button>
-  `);
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="saveLote(${lote?`'${lote.id}'`:'null'})">Guardar</button>`);
 }
 
 async function editLote(id) {
@@ -964,30 +860,20 @@ async function editLote(id) {
 
 async function saveLote(id) {
   const d = getFormData('frm-lote');
-  if (!d.nombre || d.cantidad_inicial == null) return toast('Nombre y cantidad son obligatorios', 'error');
+  if (!d.nombre||d.cantidad_inicial==null) return toast('Nombre y cantidad son obligatorios', 'error');
   d.activo = d.activo === 'true';
-  if (id) {
-    const { error } = await db.from('lotes_gallinas').update(d).eq('id', id);
-    if (error) return toast(error.message, 'error');
-  } else {
-    const { error } = await db.from('lotes_gallinas').insert(d);
-    if (error) return toast(error.message, 'error');
-  }
-  closeModal();
-  toast('Lote guardado');
-  renderPage('lotes');
+  const { error } = id ? await db.from('lotes_gallinas').update(d).eq('id', id) : await db.from('lotes_gallinas').insert(d);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Lote guardado'); renderPage('lotes');
 }
 
 async function deleteLote(id) {
   if (!confirm('Eliminar este lote?')) return;
   await db.from('lotes_gallinas').delete().eq('id', id);
-  toast('Eliminado');
-  renderPage('lotes');
+  toast('Eliminado'); renderPage('lotes');
 }
 
-// ============================================================
-// CHART — barra simple con Canvas
-// ============================================================
+// ==================== CHART con etiquetas de datos ====================
 function drawBarChart(canvasId, data) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || !data.length) return;
@@ -999,52 +885,70 @@ function drawBarChart(canvasId, data) {
   ctx.scale(dpr, dpr);
 
   const w = rect.width, h = rect.height;
-  const pad = { top: 10, right: 10, bottom: 30, left: 40 };
+  const pad = { top: 28, right: 10, bottom: 36, left: 44 };
   const cw = w - pad.left - pad.right;
   const ch = h - pad.top - pad.bottom;
   const max = Math.max(...data.map(d => d.value), 1);
-  const barW = Math.max(2, (cw / data.length) - 2);
+  const gap = 2;
+  const barW = Math.max(4, (cw / data.length) - gap);
 
   ctx.clearRect(0, 0, w, h);
 
-  ctx.strokeStyle = '#E0E0D8';
+  ctx.strokeStyle = '#E2E8F0';
   ctx.lineWidth = 0.5;
+  ctx.fillStyle = '#8A94A6';
+  ctx.font = '10px Inter, sans-serif';
+  ctx.textAlign = 'right';
   for (let i = 0; i <= 4; i++) {
     const y = pad.top + ch - (ch * i / 4);
     ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
-    ctx.fillStyle = '#8A8A9E';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(Math.round(max * i / 4), pad.left - 4, y + 3);
+    ctx.fillText(Math.round(max * i / 4), pad.left - 6, y + 3);
   }
 
   data.forEach((d, i) => {
-    const x = pad.left + (i * (cw / data.length)) + 1;
+    const x = pad.left + (i * (cw / data.length)) + gap / 2;
     const barH = (d.value / max) * ch;
     const y = pad.top + ch - barH;
 
     const gradient = ctx.createLinearGradient(x, y, x, pad.top + ch);
-    gradient.addColorStop(0, '#4CAF50');
-    gradient.addColorStop(1, '#81C784');
+    gradient.addColorStop(0, '#33C3D4');
+    gradient.addColorStop(1, '#199FAC');
     ctx.fillStyle = gradient;
-    ctx.fillRect(x, y, barW, barH);
 
+    const r = Math.min(barW / 2, 4);
+    ctx.beginPath();
+    ctx.moveTo(x, pad.top + ch);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.lineTo(x + barW - r, y);
+    ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+    ctx.lineTo(x + barW, pad.top + ch);
+    ctx.closePath();
+    ctx.fill();
+
+    // Etiqueta de datos encima de la barra
+    if (d.value > 0) {
+      ctx.fillStyle = '#101822';
+      ctx.font = 'bold 10px Poppins, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(d.value, x + barW / 2, y - 6);
+    }
+
+    // Etiqueta del eje X
     if (data.length <= 31) {
       ctx.save();
-      ctx.fillStyle = '#8A8A9E';
-      ctx.font = '9px sans-serif';
+      ctx.fillStyle = '#8A94A6';
+      ctx.font = '9px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.translate(x + barW / 2, h - 4);
-      ctx.rotate(-Math.PI / 4);
+      ctx.rotate(-Math.PI / 5);
       ctx.fillText(d.label, 0, 0);
       ctx.restore();
     }
   });
 }
 
-// ============================================================
-// INIT
-// ============================================================
+// ==================== INIT ====================
 initSupabase();
 navigateTo('dashboard');
 </script>
