@@ -9,46 +9,49 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
 :root{
-  --tinta:#101822;--tinta-light:#1a2535;--tinta-lighter:#243044;
+  --tinta:#1E1B16;--tinta-light:#2A2520;--tinta-lighter:#3D342C;
   --cyan-300:#6CDAE5;--cyan-400:#33C3D4;--cyan-500:#199FAC;--cyan-600:#0D7A85;--cyan-700:#065A63;
-  --orange-300:#F0A360;--orange-400:#F08020;--orange-500:#D3680C;--orange-600:#A85000;
-  --bg:#F0F4F8;--surface:#FFF;--surface-alt:#F7F9FB;
-  --text:#101822;--text-secondary:#4A5568;--text-light:#8A94A6;
-  --border:#E2E8F0;--border-light:#EDF2F7;
-  --danger:#E53E3E;--danger-light:#FFF5F5;
-  --success:#199FAC;--success-light:#E6FFFA;
-  --warning:#F08020;--warning-light:#FFFAF0;
-  --info:#199FAC;--info-light:#E6FFFA;
-  --shadow:0 1px 3px rgba(16,24,34,.06),0 1px 2px rgba(16,24,34,.04);
-  --shadow-md:0 4px 6px rgba(16,24,34,.07),0 2px 4px rgba(16,24,34,.04);
-  --shadow-lg:0 10px 25px rgba(16,24,34,.1),0 4px 10px rgba(16,24,34,.05);
-  --radius:10px;--radius-lg:14px;--radius-xl:20px;
-  --sidebar-w:260px;
-  --font-head:'Poppins',sans-serif;--font-body:'Inter',-apple-system,sans-serif;
+  --orange-300:#F0A360;--orange-400:#F08020;--orange-500:#D16A1B;--orange-600:#A85000;
+  --bg:#FAF6F0;--surface:#FFF;--surface-alt:#F5EFE6;
+  --text:#1E1B16;--text-secondary:#6B5E52;--text-light:#9B8E82;
+  --border:#E8DFD4;--border-light:#F0E8DE;
+  --danger:#C44E3C;--danger-light:#FFF0ED;
+  --success:#3D8B50;--success-light:#EEFBF0;
+  --warning:#E89B3E;--warning-light:#FFF8ED;
+  --info:#199FAC;--info-light:#E6F7F9;
+  --shadow:0 1px 3px rgba(30,27,22,.06),0 1px 2px rgba(30,27,22,.04);
+  --shadow-md:0 4px 12px rgba(30,27,22,.08),0 2px 4px rgba(30,27,22,.04);
+  --shadow-lg:0 12px 32px rgba(30,27,22,.12),0 4px 10px rgba(30,27,22,.06);
+  --radius:12px;--radius-lg:16px;--radius-xl:24px;
+  --sidebar-w:268px;
+  --font-head:'Poppins',system-ui,sans-serif;--font-body:'Inter',-apple-system,system-ui,sans-serif;
 }
 html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-a{color:var(--cyan-500);text-decoration:none}
+a{color:var(--orange-500);text-decoration:none}
+a:hover{color:var(--orange-600)}
 button{cursor:pointer;font-family:var(--font-body)}
 input,select,textarea{font-family:var(--font-body);font-size:.9rem}
 h1,h2,h3,h4{font-family:var(--font-head)}
 
 /* Layout */
-.app{display:flex;height:100vh;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.02;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px}
+.app{display:flex;height:100vh;height:100dvh;overflow:hidden}
 .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,var(--tinta) 0%,var(--tinta-light) 100%);color:#fff;display:flex;flex-direction:column;flex-shrink:0;transition:transform .3s}
-.sidebar-header{padding:24px 20px;border-bottom:1px solid rgba(108,218,229,.1);display:flex;align-items:center;gap:14px}
-.sidebar-logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--cyan-400),var(--orange-400));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sidebar-header{padding:24px 20px;border-bottom:1px solid rgba(240,128,32,.1);display:flex;align-items:center;gap:14px}
+.sidebar-logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--orange-400),var(--orange-500));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 12px rgba(240,128,32,.3)}
 .sidebar-logo svg{width:28px;height:28px}
 .sidebar-header h1{font-size:1.05rem;font-weight:700;line-height:1.3;font-family:var(--font-head)}
 .sidebar-header h1 span{color:var(--orange-300)}
-.sidebar-header small{font-size:.65rem;color:var(--cyan-300);display:block;font-weight:400;letter-spacing:.5px;text-transform:uppercase;margin-top:2px}
+.sidebar-header small{font-size:.65rem;color:var(--orange-300);display:block;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-top:2px;opacity:.8}
 .sidebar-nav{flex:1;padding:12px 0;overflow-y:auto}
 .nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:rgba(255,255,255,.6);font-size:.875rem;font-weight:500;transition:all .2s;border:none;background:none;width:100%;text-align:left;border-left:3px solid transparent;font-family:var(--font-body)}
-.nav-item:hover{background:rgba(108,218,229,.08);color:rgba(255,255,255,.9)}
-.nav-item.active{background:rgba(108,218,229,.12);color:#fff;font-weight:600;border-left-color:var(--cyan-400)}
+.nav-item:hover{background:rgba(240,128,32,.08);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(240,128,32,.12);color:#fff;font-weight:600;border-left-color:var(--orange-400)}
 .nav-item svg{width:20px;height:20px;fill:currentColor;flex-shrink:0;opacity:.7}
 .nav-item.active svg{opacity:1}
-.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(108,218,229,.1);text-align:center}
+.sidebar-footer{padding:16px 20px;border-top:1px solid rgba(240,128,32,.1);text-align:center}
 .sidebar-footer .jaba-ref{font-size:.7rem;color:var(--orange-300);font-weight:600;letter-spacing:.3px}
 .sidebar-footer .jaba-ref span{color:var(--cyan-300)}
 .sidebar-footer small{display:block;font-size:.65rem;color:rgba(255,255,255,.3);margin-top:6px}
@@ -62,19 +65,19 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 
 /* Stat Cards */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
-.stat-card{background:var(--surface);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
-.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan-400),var(--cyan-500))}
-.stat-card.accent::before{background:linear-gradient(90deg,var(--orange-300),var(--orange-400))}
+.stat-card{background:var(--surface);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s cubic-bezier(.4,0,.2,1);border:1px solid var(--border-light)}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange-300),var(--orange-400))}
+.stat-card.accent::before{background:linear-gradient(90deg,var(--cyan-400),var(--cyan-500))}
 .stat-card.danger::before{background:var(--danger)}
 .stat-card.info::before{background:linear-gradient(90deg,var(--cyan-300),var(--cyan-500))}
 .stat-label{font-size:.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;font-weight:600}
-.stat-value{font-size:2rem;font-weight:800;line-height:1.1;font-family:var(--font-head);color:var(--tinta)}
+.stat-value{font-size:2.2rem;font-weight:800;line-height:1;font-family:var(--font-head);color:var(--tinta);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .stat-sub{font-size:.8rem;color:var(--text-secondary);margin-top:6px;display:flex;align-items:center;gap:4px}
 .stat-jaba{display:inline-flex;align-items:center;gap:4px;background:var(--warning-light);color:var(--orange-500);padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:600}
 
 /* Tables */
-.table-wrap{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.table-wrap{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--border-light)}
 .table-header{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
 .table-header h3{font-size:1rem;font-weight:700;color:var(--tinta)}
 .table-filters{display:flex;gap:6px;flex-wrap:wrap}
@@ -82,7 +85,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{text-align:left;padding:12px 16px;background:var(--surface-alt);font-weight:600;color:var(--text-light);font-size:.7rem;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;border-bottom:1px solid var(--border)}
 td{padding:11px 16px;border-bottom:1px solid var(--border-light);vertical-align:middle}
-tr:hover td{background:rgba(108,218,229,.03)}
+tr:hover td{background:rgba(240,163,96,.04)}
 .empty-row td{text-align:center;color:var(--text-light);padding:48px 16px;font-style:italic}
 
 /* Badges */
@@ -93,12 +96,12 @@ tr:hover td{background:rgba(108,218,229,.03)}
 
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius);font-size:.85rem;font-weight:600;border:1px solid transparent;transition:all .2s}
-.btn-primary{background:var(--cyan-500);color:#fff}.btn-primary:hover{background:var(--cyan-600);box-shadow:0 2px 8px rgba(25,159,172,.3)}
-.btn-cta{background:var(--orange-400);color:var(--tinta);font-weight:700}.btn-cta:hover{background:var(--orange-500);color:#fff;box-shadow:0 2px 8px rgba(240,128,32,.3)}
-.btn-outline{background:transparent;color:var(--cyan-500);border-color:var(--border)}.btn-outline:hover{background:var(--info-light);border-color:var(--cyan-400)}
+.btn-primary{background:var(--cyan-600);color:#fff}.btn-primary:hover{background:var(--cyan-700);box-shadow:0 4px 12px rgba(13,122,133,.3)}
+.btn-cta{background:var(--orange-400);color:var(--tinta);font-weight:700;transition:all .2s cubic-bezier(.4,0,.2,1)}.btn-cta:hover{background:var(--orange-500);color:#fff;box-shadow:0 4px 12px rgba(240,128,32,.3)}.btn-cta:active{transform:scale(.97)}
+.btn-outline{background:transparent;color:var(--orange-500);border-color:var(--border)}.btn-outline:hover{background:var(--warning-light);border-color:var(--orange-300)}
 .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#c53030}
 .btn-sm{padding:5px 12px;font-size:.78rem}
-.btn-icon{padding:6px;border-radius:8px;background:none;border:1px solid var(--border-light);color:var(--text-light);transition:all .15s}.btn-icon:hover{background:var(--info-light);color:var(--cyan-500);border-color:var(--cyan-400)}
+.btn-icon{padding:7px;border-radius:10px;background:none;border:1px solid var(--border-light);color:var(--text-light);transition:all .2s}.btn-icon:hover{background:var(--warning-light);color:var(--orange-500);border-color:var(--orange-300)}
 .btn svg{width:16px;height:16px;fill:currentColor}
 
 /* Forms */
@@ -108,13 +111,14 @@ tr:hover td{background:rgba(108,218,229,.03)}
 .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 input[type="text"],input[type="number"],input[type="date"],input[type="tel"],select,textarea{
   width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;background:var(--surface);transition:all .2s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan-400);box-shadow:0 0 0 3px rgba(108,218,229,.15)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange-400);box-shadow:0 0 0 3px rgba(240,128,32,.12)}
 textarea{resize:vertical;min-height:60px}
 
 /* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(16,24,34,.5);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(30,27,22,.55);backdrop-filter:blur(6px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column}
+.modal{background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;animation:modalIn .25s cubic-bezier(.4,0,.2,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .modal-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .modal-head h3{font-size:1.05rem;font-weight:700;font-family:var(--font-head);color:var(--tinta)}
 .modal-close{background:none;border:none;font-size:1.4rem;color:var(--text-light);padding:4px 8px;transition:color .15s}.modal-close:hover{color:var(--danger)}
@@ -124,17 +128,17 @@ textarea{resize:vertical;min-height:60px}
 /* Toast */
 .toast-container{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px}
 .toast{padding:12px 20px;border-radius:var(--radius);color:#fff;font-size:.85rem;font-weight:600;box-shadow:var(--shadow-lg);animation:slideIn .3s ease}
-.toast-success{background:var(--cyan-600)}.toast-error{background:var(--danger)}.toast-info{background:var(--cyan-500)}
+.toast-success{background:var(--success)}.toast-error{background:var(--danger)}.toast-info{background:var(--info)}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
 /* Chart */
-.chart-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px;margin-bottom:28px}
+.chart-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:28px;border:1px solid var(--border-light)}
 .chart-card h3{font-size:1rem;font-weight:700;margin-bottom:4px;color:var(--tinta)}
 .chart-card .chart-sub{font-size:.78rem;color:var(--text-light);margin-bottom:16px}
 canvas{width:100%!important;height:220px!important}
 
 /* Quick form */
-.quick-form{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px;margin-bottom:24px;border-top:3px solid var(--cyan-400)}
+.quick-form{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:24px;border-left:4px solid var(--orange-400);border:1px solid var(--border-light);border-left:4px solid var(--orange-400)}
 .quick-form h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--tinta)}
 .quick-form .form-inline{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
 .quick-form .form-inline .form-group{margin-bottom:0;flex:1;min-width:120px}
@@ -143,14 +147,35 @@ canvas{width:100%!important;height:220px!important}
 .config-banner{background:linear-gradient(135deg,var(--tinta),var(--tinta-light));border-radius:var(--radius-xl);padding:32px;margin-bottom:24px;text-align:center;color:#fff}
 .config-banner h3{color:var(--orange-300);margin-bottom:12px;font-size:1.2rem}
 .config-banner p{color:rgba(255,255,255,.7);line-height:1.6}
-.config-banner code{background:rgba(108,218,229,.15);color:var(--cyan-300);padding:2px 8px;border-radius:6px;font-size:.85rem}
+.config-banner code{background:rgba(240,128,32,.15);color:var(--cyan-300);padding:2px 8px;border-radius:6px;font-size:.85rem}
 
 /* Info strip */
-.info-strip{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(108,218,229,.08),rgba(240,128,32,.06));border:1px solid rgba(108,218,229,.2);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:24px;flex-wrap:wrap}
+.info-strip{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(240,128,32,.08),rgba(240,128,32,.06));border:1px solid rgba(240,128,32,.2);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:24px;flex-wrap:wrap}
 .info-strip .info-item{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--tinta)}
-.info-strip .info-item .num{color:var(--cyan-500);font-family:var(--font-head);font-size:1rem}
+.info-strip .info-item .num{color:var(--orange-500);font-family:var(--font-head);font-size:1rem;font-variant-numeric:tabular-nums}
 .info-strip .info-item .label{color:var(--text-secondary);font-weight:400}
 .info-strip .divider{width:1px;height:24px;background:var(--border)}
+
+/* Login / sesion */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--tinta) 0%,var(--tinta-light) 60%,var(--tinta-lighter) 100%);padding:20px}
+.login-card{background:var(--surface);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);width:100%;max-width:400px;padding:40px 32px;text-align:center}
+.login-card .login-logo{width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,var(--orange-400),var(--orange-500));display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 4px 12px rgba(240,128,32,.3)}
+.login-card .login-logo svg{width:48px;height:48px}
+.login-card h2{font-size:1.5rem;font-weight:800;color:var(--tinta);margin-bottom:2px;font-family:var(--font-head)}
+.login-card h2 span{color:var(--orange-400)}
+.login-card .login-sub{color:var(--text-light);font-size:.8rem;margin-bottom:28px}
+.login-card .form-group{text-align:left}
+.login-card input[type="email"],.login-card input[type="password"]{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:.9rem;background:var(--surface);transition:all .2s;font-family:var(--font-body)}
+.login-card input:focus{outline:none;border-color:var(--orange-400);box-shadow:0 0 0 3px rgba(240,128,32,.12)}
+.login-card .btn{width:100%;justify-content:center;padding:12px;font-size:.95rem}
+.login-card .login-error{background:var(--danger-light);color:var(--danger);padding:10px;border-radius:var(--radius);font-size:.82rem;margin-bottom:16px;display:none;font-weight:500}
+.login-card .login-nota{margin-top:18px;font-size:.72rem;color:var(--text-light);line-height:1.5}
+.app{display:none}
+.app.visible{display:flex}
+.user-badge{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-secondary)}
+.user-badge .user-email{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--text-light);padding:5px 12px;border-radius:var(--radius);font-size:.75rem;font-weight:600;transition:all .2s;cursor:pointer}
+.btn-logout:hover{background:var(--danger-light);color:var(--danger);border-color:var(--danger)}
 
 /* Responsive */
 @media(max-width:768px){
@@ -169,7 +194,35 @@ canvas{width:100%!important;height:220px!important}
 </style>
 </head>
 <body>
-<div class="app">
+<!-- PANTALLA DE INGRESO -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 32 32" fill="none">
+        <ellipse cx="16" cy="20" rx="8" ry="10" fill="#FFF8E1"/>
+        <ellipse cx="16" cy="19" rx="6.5" ry="8.5" fill="#FFE082"/>
+        <path d="M14 10c0-2 1-4 2-4s2 2 2 4" fill="#C44E3C"/>
+        <path d="M13 10.5c-.5-.5-1.5-.3-1.5.5s1 1 1.5.5z" fill="#C44E3C"/>
+        <path d="M19 10.5c.5-.5 1.5-.3 1.5.5s-1 1-1.5.5z" fill="#C44E3C"/>
+        <circle cx="14" cy="14" r="1" fill="#1E1B16"/>
+        <circle cx="18" cy="14" r="1" fill="#1E1B16"/>
+        <path d="M15 16.5c0 .3.5.5 1 .5s1-.2 1-.5" stroke="#F08020" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+    <h2>Juanita <span>&</span> su Gallo</h2>
+    <p class="login-sub">Control Avícola &bull; Inicia sesión para continuar</p>
+    <div class="login-error" id="login-error"></div>
+    <form id="frm-login" onsubmit="handleAuth(); return false">
+      <div class="form-group"><label>Correo electrónico</label><input type="email" id="auth-email" required placeholder="tu@correo.com" autocomplete="username"></div>
+      <div class="form-group"><label>Contraseña</label><input type="password" id="auth-pass" required placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="current-password"></div>
+      <button class="btn btn-cta" id="auth-btn" type="submit">Iniciar sesión</button>
+    </form>
+    <p class="login-nota">Acceso solo para la familia. Las cuentas se crean desde el panel de Supabase.</p>
+  </div>
+</div>
+
+<!-- APP (oculta hasta iniciar sesión) -->
+<div class="app" id="app">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
@@ -179,8 +232,8 @@ canvas{width:100%!important;height:220px!important}
           <path d="M14 10c0-2 1-4 2-4s2 2 2 4" fill="#E53E3E"/>
           <path d="M13 10.5c-.5-.5-1.5-.3-1.5.5s1 1 1.5.5z" fill="#E53E3E"/>
           <path d="M19 10.5c.5-.5 1.5-.3 1.5.5s-1 1-1.5.5z" fill="#E53E3E"/>
-          <circle cx="14" cy="14" r="1" fill="#101822"/>
-          <circle cx="18" cy="14" r="1" fill="#101822"/>
+          <circle cx="14" cy="14" r="1" fill="#1E1B16"/>
+          <circle cx="18" cy="14" r="1" fill="#1E1B16"/>
           <path d="M15 16.5c0 .3.5.5 1 .5s1-.2 1-.5" stroke="#F08020" stroke-width="1.2" stroke-linecap="round" fill="none"/>
           <path d="M14.5 17.5l16 18" stroke="#F08020" stroke-width=".8" fill="none"/>
         </svg>
@@ -192,7 +245,7 @@ canvas{width:100%!important;height:220px!important}
         <svg viewBox="0 0 20 20"><path d="M10 2L2 7v11h6v-6h4v6h6V7l-8-5z"/></svg>Dashboard
       </button>
       <button class="nav-item" data-page="produccion">
-        <svg viewBox="0 0 20 20"><ellipse cx="10" cy="11" rx="6" ry="8"/></svg>Produccion
+        <svg viewBox="0 0 20 20"><ellipse cx="10" cy="11" rx="6" ry="8"/></svg>Producción
       </button>
       <button class="nav-item" data-page="pedidos">
         <svg viewBox="0 0 20 20"><path d="M3 3h14l-2 9H5L3 3zm3 13a2 2 0 104 0 2 2 0 00-4 0zm8 0a2 2 0 104 0 2 2 0 00-4 0z"/></svg>Pedidos
@@ -204,10 +257,13 @@ canvas{width:100%!important;height:220px!important}
         <svg viewBox="0 0 20 20"><path d="M4 4h12l1 12H3zm2-2h8v2H6z"/></svg>Compras
       </button>
       <button class="nav-item" data-page="gastos">
-        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#101822" font-weight="bold">S/</text></svg>Gastos
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><text x="10" y="14" text-anchor="middle" font-size="10" fill="#1E1B16" font-weight="bold">S/</text></svg>Gastos
       </button>
       <button class="nav-item" data-page="clientes">
         <svg viewBox="0 0 20 20"><circle cx="10" cy="6" r="4"/><path d="M2 18c0-4 4-7 8-7s8 3 8 7z"/></svg>Clientes
+      </button>
+      <button class="nav-item" data-page="vendedores">
+        <svg viewBox="0 0 20 20"><circle cx="7" cy="5" r="3"/><path d="M1 16c0-3 3-5 6-5s6 2 6 5z"/><circle cx="15" cy="6" r="2.5"/><path d="M12 16c0-2.5 2-4.5 4-4.5s3 2 3 4.5z"/></svg>Vendedores
       </button>
       <button class="nav-item" data-page="lotes">
         <svg viewBox="0 0 20 20"><path d="M10 2c-2 0-3 1-3 2 0 2 1 3 3 4 2-1 3-2 3-4 0-1-1-2-3-2zm-5 8c-1.5 0-2.5 3-2.5 5s1 3 2.5 3 2.5-1 2.5-3-1-5-2.5-5zm10 0c-1.5 0-2.5 3-2.5 5s1 3 2.5 3 2.5-1 2.5-3-1-5-2.5-5z"/></svg>Lotes
@@ -215,7 +271,7 @@ canvas{width:100%!important;height:220px!important}
     </nav>
     <div class="sidebar-footer">
       <div class="jaba-ref">1 Jaba = <span>30</span> Huevos &bull; S/0.80/ud</div>
-      <small>Juanita & su Gallo v2.0</small>
+      <small>Juanita & su Gallo v3.0</small>
     </div>
   </aside>
 
@@ -227,7 +283,13 @@ canvas{width:100%!important;height:220px!important}
         </button>
         <h2 id="page-title">Dashboard</h2>
       </div>
-      <div class="topbar-actions" id="topbar-actions"></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="topbar-actions" id="topbar-actions"></div>
+        <div class="user-badge">
+          <span class="user-email" id="user-email"></span>
+          <button class="btn-logout" onclick="handleLogout()">Salir</button>
+        </div>
+      </div>
     </div>
     <div class="content" id="content"></div>
   </div>
@@ -264,6 +326,54 @@ function initSupabase() {
     console.error('Error conectando a Supabase:', e);
     return false;
   }
+}
+
+// ==================== SESION ====================
+function showApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('user-email').textContent = user.email;
+  navigateTo('dashboard');
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+async function handleAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('auth-btn');
+  errEl.style.display = 'none';
+
+  if (!email || !pass) { errEl.textContent = 'Completa correo y contraseña'; errEl.style.display = 'block'; return; }
+  if (pass.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres'; errEl.style.display = 'block'; return; }
+  if (!isConnected) { errEl.textContent = 'Sin conexión con la base de datos'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    errEl.textContent = error.message === 'Invalid login credentials'
+      ? 'Correo o contraseña incorrectos'
+      : error.message;
+    errEl.style.display = 'block';
+  } else {
+    document.getElementById('auth-pass').value = '';
+    showApp(data.user);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Iniciar sesión';
+}
+
+async function handleLogout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  await db.auth.signOut();
+  showLogin();
 }
 
 function toast(msg, type = 'success') {
@@ -340,9 +450,9 @@ function navigateTo(page) {
   currentPage = page;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
   const titles = {
-    dashboard: 'Dashboard', produccion: 'Produccion Diaria', pedidos: 'Pedidos',
-    stock: 'Stock', compras: 'Compras de Insumos', gastos: 'Gastos',
-    clientes: 'Clientes', lotes: 'Lotes de Gallinas'
+    dashboard: 'Dashboard', produccion: 'Producción diaria', pedidos: 'Pedidos',
+    stock: 'Stock', compras: 'Compras de insumos', gastos: 'Gastos',
+    clientes: 'Clientes', vendedores: 'Vendedores', lotes: 'Lotes de gallinas'
   };
   document.getElementById('page-title').textContent = titles[page] || page;
   renderPage(page);
@@ -361,6 +471,7 @@ async function renderPage(page) {
     case 'compras': await renderCompras(c, a); break;
     case 'gastos': await renderGastos(c, a); break;
     case 'clientes': await renderClientes(c, a); break;
+    case 'vendedores': await renderVendedores(c, a); break;
     case 'lotes': await renderLotes(c, a); break;
   }
 }
@@ -411,7 +522,7 @@ async function renderDashboard(c, a) {
         <div class="stat-sub">${jabasBadge(stock.stock_disponible || 0)}</div>
       </div>
       <div class="stat-card accent">
-        <div class="stat-label">Produccion Hoy</div>
+        <div class="stat-label">Producción hoy</div>
         <div class="stat-value">${hoy}</div>
         <div class="stat-sub">${jabasBadge(hoy)}</div>
       </div>
@@ -422,13 +533,13 @@ async function renderDashboard(c, a) {
       </div>
       <div class="stat-card ${balance >= 0 ? '' : 'danger'}">
         <div class="stat-label">Balance del Mes</div>
-        <div class="stat-value" style="color:${balance >= 0 ? 'var(--cyan-600)' : 'var(--danger)'}">${formatMoney(balance)}</div>
+        <div class="stat-value" style="color:${balance >= 0 ? 'var(--success)' : 'var(--danger)'}">${formatMoney(balance)}</div>
         <div class="stat-sub">Ingresos ${formatMoney(ingresos)} &mdash; Egresos ${formatMoney(egresosTotal)}</div>
       </div>
     </div>
     <div class="chart-card">
-      <h3>Produccion Ultimos 30 Dias</h3>
-      <div class="chart-sub">Huevos producidos por dia &bull; Las etiquetas muestran la cantidad exacta</div>
+      <h3>Producción · últimos 30 días</h3>
+      <div class="chart-sub">Huevos producidos por día &bull; Las etiquetas muestran la cantidad exacta</div>
       <canvas id="chart-prod"></canvas>
     </div>
   `;
@@ -451,7 +562,7 @@ async function renderProduccion(c, a) {
 
   c.innerHTML = `
     <div class="quick-form">
-      <h3>Registrar Produccion</h3>
+      <h3>Registrar producción</h3>
       <form id="frm-prod" class="form-inline" onsubmit="return false">
         <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${today()}" required></div>
         <div class="form-group"><label>Huevos</label><input type="number" name="cantidad_huevos" min="0" required placeholder="0"></div>
@@ -463,7 +574,7 @@ async function renderProduccion(c, a) {
       </form>
     </div>
     <div class="table-wrap">
-      <div class="table-header"><h3>Historial de Produccion</h3></div>
+      <div class="table-header"><h3>Historial de producción</h3></div>
       <div class="table-scroll"><table>
         <thead><tr><th>Fecha</th><th>Huevos</th><th>Jabas</th><th>Rotos</th><th>Descart.</th><th>Neto</th><th>Lote</th><th>Notas</th><th></th></tr></thead>
         <tbody>
@@ -493,7 +604,7 @@ async function saveProduccion() {
   if (!d.lote_id) delete d.lote_id;
   const { error } = await db.from('produccion_diaria').insert(d);
   if (error) return toast(error.message, 'error');
-  toast('Produccion registrada');
+  toast('Producción registrada');
   renderPage('produccion');
 }
 
@@ -616,7 +727,7 @@ async function renderStock(c) {
       <div class="info-item"><span class="label">Stock se calcula:</span> Produccion Neta &minus; Pedidos Entregados</div>
     </div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Produccion Neta Total</div><div class="stat-value">${s.total_producido_neto}</div><div class="stat-sub">${jabasBadge(s.total_producido_neto)}</div></div>
+      <div class="stat-card"><div class="stat-label">Producción neta total</div><div class="stat-value">${s.total_producido_neto}</div><div class="stat-sub">${jabasBadge(s.total_producido_neto)}</div></div>
       <div class="stat-card accent"><div class="stat-label">Total Vendido</div><div class="stat-value">${s.total_vendido}</div><div class="stat-sub">${jabasBadge(s.total_vendido)}</div></div>
       <div class="stat-card info"><div class="stat-label">Stock Disponible</div><div class="stat-value">${s.stock_disponible}</div><div class="stat-sub">${jabasBadge(s.stock_disponible)}</div></div>
       <div class="stat-card ${libre<0?'danger':''}"><div class="stat-label">Libre (- comprometidos)</div><div class="stat-value">${libre}</div><div class="stat-sub">${s.comprometido_pendiente} en pedidos pendientes</div></div>
@@ -873,6 +984,183 @@ async function deleteLote(id) {
   toast('Eliminado'); renderPage('lotes');
 }
 
+// ==================== VENDEDORES (fiado / entregas) ====================
+async function renderVendedores(c, a) {
+  a.innerHTML = `<button class="btn btn-outline btn-sm" onclick="showVendedoresList()">Mis vendedores</button>
+    <button class="btn btn-cta" onclick="openVendedorForm()">+ Nuevo Vendedor</button>`;
+
+  const vendedores = (await db.from('vendedores').select('*').eq('activo', true).order('nombre')).data || [];
+  const { data: entregas } = await db.from('entregas_vendedor').select('*,vendedores(nombre)').order('fecha', { ascending: false }).limit(200);
+  const rows = entregas || [];
+
+  const deuda = {};
+  let totalFiado = 0;
+  rows.forEach(e => {
+    const f = e.jabas_entregadas - e.jabas_pagadas;
+    if (f > 0) {
+      const vid = e.vendedor_id || '_';
+      const nom = e.vendedores?.nombre || '—';
+      if (!deuda[vid]) deuda[vid] = { nombre: nom, jabas: 0, monto: 0 };
+      deuda[vid].jabas += f;
+      deuda[vid].monto += f * Number(e.precio_jaba);
+      totalFiado += f * Number(e.precio_jaba);
+    }
+  });
+  const conDeuda = Object.values(deuda).filter(d => d.monto > 0).length;
+
+  const mes = today().slice(0, 7);
+  const delMes = rows.filter(e => e.fecha && e.fecha.startsWith(mes));
+  const entregadoMes = delMes.reduce((s, e) => s + e.jabas_entregadas * Number(e.precio_jaba), 0);
+  const cobradoMes = delMes.reduce((s, e) => s + e.jabas_pagadas * Number(e.precio_jaba), 0);
+  const jabasEntMes = delMes.reduce((s, e) => s + e.jabas_entregadas, 0);
+  const jabasPagMes = delMes.reduce((s, e) => s + e.jabas_pagadas, 0);
+
+  const opts = vendedores.map(v => `<option value="${v.id}">${v.nombre}</option>`).join('');
+
+  c.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total fiado</div>
+        <div class="stat-value" style="color:var(--danger,#c0392b)">${formatMoney(totalFiado)}</div>
+        <div class="stat-sub">${conDeuda} vendedor${conDeuda !== 1 ? 'es' : ''} con deuda</div></div>
+      <div class="stat-card"><div class="stat-label">Entregado este mes</div>
+        <div class="stat-value">${formatMoney(entregadoMes)}</div>
+        <div class="stat-sub">${jabasEntMes} jaba${jabasEntMes !== 1 ? 's' : ''}</div></div>
+      <div class="stat-card"><div class="stat-label">Cobrado este mes</div>
+        <div class="stat-value">${formatMoney(cobradoMes)}</div>
+        <div class="stat-sub">${jabasPagMes} jaba${jabasPagMes !== 1 ? 's' : ''} pagadas</div></div>
+    </div>
+    ${conDeuda > 0 ? `<div class="table-wrap" style="margin-bottom:24px">
+      <div class="table-header"><h3>Deuda por vendedor</h3></div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Vendedor</th><th>Jabas fiadas</th><th>Monto pendiente</th></tr></thead>
+        <tbody>${Object.values(deuda).filter(d => d.monto > 0).sort((a, b) => b.monto - a.monto).map(d => `<tr>
+          <td><strong>${d.nombre}</strong></td>
+          <td><span class="stat-jaba">${d.jabas} jaba${d.jabas !== 1 ? 's' : ''}</span></td>
+          <td><strong style="color:var(--danger,#c0392b)">${formatMoney(d.monto)}</strong></td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>` : ''}
+    <div class="quick-form">
+      <h3>Registrar entrega</h3>
+      <form id="frm-entrega" class="form-inline" onsubmit="return false">
+        <div class="form-group"><label>Vendedor</label><select name="vendedor_id" required><option value="">— Seleccionar —</option>${opts}</select></div>
+        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${today()}" required></div>
+        <div class="form-group"><label>Jabas entregadas</label><input type="number" name="jabas_entregadas" min="1" required placeholder="5"></div>
+        <div class="form-group"><label>Jabas pagadas</label><input type="number" name="jabas_pagadas" min="0" value="0" placeholder="3"></div>
+        <div class="form-group"><label>Precio/jaba</label><input type="number" name="precio_jaba" step="0.01" value="${PRECIO_JABA}"></div>
+        <div class="form-group"><label>Notas</label><input type="text" name="notas" placeholder="Opcional"></div>
+        <div class="form-group"><label>&nbsp;</label><button class="btn btn-cta" onclick="saveEntrega()">Registrar</button></div>
+      </form>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header"><h3>Historial de entregas</h3></div>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Fecha</th><th>Vendedor</th><th>Entregadas</th><th>Pagadas</th><th>Fiadas</th><th>Total</th><th>Pagado</th><th>Fiado</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          ${rows.length === 0 ? '<tr class="empty-row"><td colspan="10">Sin entregas registradas</td></tr>' : ''}
+          ${rows.map(e => { const f = e.jabas_entregadas - e.jabas_pagadas; const mt = e.jabas_entregadas * Number(e.precio_jaba); const mp = e.jabas_pagadas * Number(e.precio_jaba); const mf = f * Number(e.precio_jaba); const ok = f <= 0; return `<tr>
+            <td>${formatDate(e.fecha)}</td>
+            <td><strong>${e.vendedores?.nombre || '—'}</strong></td>
+            <td>${e.jabas_entregadas}</td><td>${e.jabas_pagadas}</td>
+            <td>${f > 0 ? `<strong style="color:var(--danger,#c0392b)">${f}</strong>` : '0'}</td>
+            <td>${formatMoney(mt)}</td><td>${formatMoney(mp)}</td>
+            <td>${mf > 0 ? `<strong style="color:var(--danger,#c0392b)">${formatMoney(mf)}</strong>` : formatMoney(0)}</td>
+            <td><span class="badge ${ok ? 'badge-entregado' : 'badge-pendiente'}">${ok ? 'Saldado' : 'Fiado'}</span></td>
+            <td style="white-space:nowrap">
+              ${!ok ? `<button class="btn btn-sm btn-primary" onclick="abonarEntrega('${e.id}',${e.jabas_entregadas},${e.jabas_pagadas})">Abonar</button>` : ''}
+              <button class="btn-icon btn-sm" onclick="deleteEntrega('${e.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+            </td></tr>`; }).join('')}
+        </tbody>
+      </table></div>
+    </div>`;
+}
+
+async function saveEntrega() {
+  const d = getFormData('frm-entrega');
+  if (!d.vendedor_id) return toast('Selecciona un vendedor', 'error');
+  if (!d.jabas_entregadas || d.jabas_entregadas < 1) return toast('Indica las jabas entregadas', 'error');
+  d.jabas_pagadas = d.jabas_pagadas || 0;
+  if (d.jabas_pagadas > d.jabas_entregadas) return toast('Las pagadas no pueden superar las entregadas', 'error');
+  d.precio_jaba = d.precio_jaba || PRECIO_JABA;
+  const { error } = await db.from('entregas_vendedor').insert(d);
+  if (error) return toast(error.message, 'error');
+  toast('Entrega registrada'); renderPage('vendedores');
+}
+
+async function abonarEntrega(id, total, pagadas) {
+  const pend = total - pagadas;
+  openModal('Registrar abono', `
+    <form id="frm-abono">
+      <p style="margin-bottom:16px;color:var(--text-secondary,#6b6560)">Hay <strong>${pend} jaba${pend !== 1 ? 's' : ''}</strong> pendiente${pend !== 1 ? 's' : ''} de pago.</p>
+      <div class="form-group"><label>Jabas que abona ahora</label><input type="number" name="jabas_abono" min="1" max="${pend}" value="${pend}" required></div>
+    </form>
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="confirmarAbono('${id}',${pagadas})">Confirmar</button>`);
+}
+
+async function confirmarAbono(id, pagadas) {
+  const d = getFormData('frm-abono');
+  if (!d.jabas_abono || d.jabas_abono < 1) return toast('Indica cuantas jabas abona', 'error');
+  const { error } = await db.from('entregas_vendedor').update({ jabas_pagadas: pagadas + d.jabas_abono }).eq('id', id);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Abono registrado'); renderPage('vendedores');
+}
+
+async function deleteEntrega(id) {
+  if (!confirm('Eliminar esta entrega?')) return;
+  await db.from('entregas_vendedor').delete().eq('id', id);
+  toast('Eliminado'); renderPage('vendedores');
+}
+
+async function showVendedoresList() {
+  const { data: rows } = await db.from('vendedores').select('*').order('nombre');
+  openModal('Mis vendedores', `
+    <div class="table-scroll"><table>
+      <thead><tr><th>Nombre</th><th>Telefono</th><th>Zona</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="5">Sin vendedores registrados</td></tr>' : ''}
+        ${(rows || []).map(r => `<tr>
+          <td><strong>${r.nombre}</strong></td><td>${r.telefono || '—'}</td><td>${r.zona || '—'}</td>
+          <td><span class="badge ${r.activo ? 'badge-entregado' : 'badge-cancelado'}">${r.activo ? 'Activo' : 'Inactivo'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn-icon btn-sm" onclick="editVendedor('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
+            <button class="btn-icon btn-sm" onclick="deleteVendedor('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>
+  `, '<button class="btn btn-outline" onclick="closeModal()">Cerrar</button>');
+}
+
+async function openVendedorForm(vendedor) {
+  openModal(vendedor ? 'Editar vendedor' : 'Nuevo vendedor', `
+    <form id="frm-vendedor">
+      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${vendedor?.nombre || ''}" required></div>
+      <div class="form-group"><label>Telefono</label><input type="tel" name="telefono" value="${vendedor?.telefono || ''}"></div>
+      <div class="form-group"><label>Zona</label><input type="text" name="zona" value="${vendedor?.zona || ''}" placeholder="Ej: SJL, Comas..."></div>
+      <div class="form-group"><label>Notas</label><textarea name="notas">${vendedor?.notas || ''}</textarea></div>
+    </form>
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="saveVendedor(${vendedor ? `'${vendedor.id}'` : 'null'})">Guardar</button>`);
+}
+
+async function editVendedor(id) {
+  const { data } = await db.from('vendedores').select('*').eq('id', id).single();
+  if (data) openVendedorForm(data);
+}
+
+async function saveVendedor(id) {
+  const d = getFormData('frm-vendedor');
+  if (!d.nombre) return toast('El nombre es obligatorio', 'error');
+  const { error } = id ? await db.from('vendedores').update(d).eq('id', id) : await db.from('vendedores').insert(d);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast('Vendedor guardado'); renderPage('vendedores');
+}
+
+async function deleteVendedor(id) {
+  if (!confirm('Eliminar este vendedor?')) return;
+  await db.from('vendedores').delete().eq('id', id);
+  toast('Eliminado'); showVendedoresList();
+}
+
 // ==================== CHART con etiquetas de datos ====================
 function drawBarChart(canvasId, data) {
   const canvas = document.getElementById(canvasId);
@@ -894,9 +1182,9 @@ function drawBarChart(canvasId, data) {
 
   ctx.clearRect(0, 0, w, h);
 
-  ctx.strokeStyle = '#E2E8F0';
+  ctx.strokeStyle = '#E8DFD4';
   ctx.lineWidth = 0.5;
-  ctx.fillStyle = '#8A94A6';
+  ctx.fillStyle = '#9B8E82';
   ctx.font = '10px Inter, sans-serif';
   ctx.textAlign = 'right';
   for (let i = 0; i <= 4; i++) {
@@ -911,8 +1199,8 @@ function drawBarChart(canvasId, data) {
     const y = pad.top + ch - barH;
 
     const gradient = ctx.createLinearGradient(x, y, x, pad.top + ch);
-    gradient.addColorStop(0, '#33C3D4');
-    gradient.addColorStop(1, '#199FAC');
+    gradient.addColorStop(0, '#F0A360');
+    gradient.addColorStop(1, '#D16A1B');
     ctx.fillStyle = gradient;
 
     const r = Math.min(barW / 2, 4);
@@ -928,7 +1216,7 @@ function drawBarChart(canvasId, data) {
 
     // Etiqueta de datos encima de la barra
     if (d.value > 0) {
-      ctx.fillStyle = '#101822';
+      ctx.fillStyle = '#1E1B16';
       ctx.font = 'bold 10px Poppins, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(d.value, x + barW / 2, y - 6);
@@ -937,7 +1225,7 @@ function drawBarChart(canvasId, data) {
     // Etiqueta del eje X
     if (data.length <= 31) {
       ctx.save();
-      ctx.fillStyle = '#8A94A6';
+      ctx.fillStyle = '#9B8E82';
       ctx.font = '9px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.translate(x + barW / 2, h - 4);
@@ -950,7 +1238,19 @@ function drawBarChart(canvasId, data) {
 
 // ==================== INIT ====================
 initSupabase();
-navigateTo('dashboard');
+
+(async () => {
+  if (!isConnected) { showLogin(); return; }
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    showApp(session.user);
+  } else {
+    showLogin();
+  }
+  db.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') showLogin();
+  });
+})();
 </script>
 </body>
 </html>
