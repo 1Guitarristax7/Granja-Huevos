@@ -452,7 +452,7 @@ function navigateTo(page) {
   const titles = {
     dashboard: 'Dashboard', produccion: 'Producción diaria', pedidos: 'Pedidos',
     stock: 'Stock', compras: 'Compras de insumos', gastos: 'Gastos',
-    clientes: 'Clientes', vendedores: 'Vendedores', lotes: 'Lotes de gallinas'
+    clientes: 'Clientes', vendedores: 'Revendedores (Fiado)', lotes: 'Lotes de gallinas'
   };
   document.getElementById('page-title').textContent = titles[page] || page;
   renderPage(page);
@@ -488,24 +488,28 @@ function renderConfigBanner() {
 async function renderDashboard(c, a) {
   c.innerHTML = '<p style="color:var(--text-light)">Cargando...</p>';
 
-  const [stockRes, prodHoy, pedPend, ingMes, gasMes, compMes, prod30] = await Promise.all([
+  const [stockRes, prodHoy, pedPend, pedMes, gasMes, compMes, prod30, fiadoRes] = await Promise.all([
     db.from('stock_actual').select('*').single(),
     db.from('produccion_diaria').select('cantidad_huevos').eq('fecha', today()),
-    db.from('pedidos').select('total').eq('estado', 'pendiente'),
-    db.from('pedidos').select('total').eq('estado', 'entregado').gte('fecha_pedido', today().slice(0, 7) + '-01'),
+    db.from('pedidos').select('total,monto_pagado').eq('estado', 'pendiente'),
+    db.from('pedidos').select('total,monto_pagado').neq('estado', 'cancelado').gte('fecha_pedido', today().slice(0, 7) + '-01'),
     db.from('gastos').select('monto').gte('fecha', today().slice(0, 7) + '-01'),
     db.from('compras').select('total').gte('fecha', today().slice(0, 7) + '-01'),
-    db.from('produccion_diaria').select('fecha,cantidad_huevos').order('fecha', { ascending: true }).gte('fecha', new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0])
+    db.from('produccion_diaria').select('fecha,cantidad_huevos').order('fecha', { ascending: true }).gte('fecha', new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]),
+    db.from('pedidos').select('total,monto_pagado').neq('estado', 'cancelado')
   ]);
 
   const stock = stockRes.data || { stock_disponible: 0, comprometido_pendiente: 0, total_producido_neto: 0, total_vendido: 0 };
   const hoy = (prodHoy.data || []).reduce((s, r) => s + r.cantidad_huevos, 0);
   const pendientes = pedPend.data || [];
-  const ingresos = (ingMes.data || []).reduce((s, r) => s + Number(r.total), 0);
+  const pedidosMes = pedMes.data || [];
+  const cobradoMes = pedidosMes.reduce((s, r) => s + Number(r.monto_pagado || 0), 0);
   const gastosTotal = (gasMes.data || []).reduce((s, r) => s + Number(r.monto), 0);
   const comprasTotal = (compMes.data || []).reduce((s, r) => s + Number(r.total), 0);
   const egresosTotal = gastosTotal + comprasTotal;
-  const balance = ingresos - egresosTotal;
+  const balance = cobradoMes - egresosTotal;
+  const fiadoTotal = (fiadoRes.data || []).reduce((s, r) => s + Math.max(0, Number(r.total) - Number(r.monto_pagado || 0)), 0);
+  const pedConDeuda = (fiadoRes.data || []).filter(r => Number(r.total) - Number(r.monto_pagado || 0) > 0).length;
 
   c.innerHTML = `
     <div class="info-strip">
@@ -529,12 +533,17 @@ async function renderDashboard(c, a) {
       <div class="stat-card info">
         <div class="stat-label">Pedidos Pendientes</div>
         <div class="stat-value">${pendientes.length}</div>
-        <div class="stat-sub">${formatMoney(pendientes.reduce((s, r) => s + Number(r.total), 0))} por cobrar</div>
+        <div class="stat-sub">${formatMoney(pendientes.reduce((s, r) => s + Number(r.total), 0))} por entregar</div>
+      </div>
+      <div class="stat-card ${fiadoTotal > 0 ? 'danger' : ''}">
+        <div class="stat-label">Fiado Total</div>
+        <div class="stat-value" style="color:${fiadoTotal > 0 ? 'var(--danger)' : 'var(--success)'}">${formatMoney(fiadoTotal)}</div>
+        <div class="stat-sub">${pedConDeuda} pedido${pedConDeuda !== 1 ? 's' : ''} con deuda</div>
       </div>
       <div class="stat-card ${balance >= 0 ? '' : 'danger'}">
         <div class="stat-label">Balance del Mes</div>
         <div class="stat-value" style="color:${balance >= 0 ? 'var(--success)' : 'var(--danger)'}">${formatMoney(balance)}</div>
-        <div class="stat-sub">Ingresos ${formatMoney(ingresos)} &mdash; Egresos ${formatMoney(egresosTotal)}</div>
+        <div class="stat-sub">Cobrado ${formatMoney(cobradoMes)} &mdash; Egresos ${formatMoney(egresosTotal)}</div>
       </div>
     </div>
     <div class="chart-card">
@@ -620,7 +629,7 @@ async function renderPedidos(c, a) {
   a.innerHTML = '<button class="btn btn-cta" onclick="openPedidoForm()"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2"/></svg> Nuevo Pedido</button>';
 
   const { data: rows } = await db.from('pedidos')
-    .select('*,clientes(nombre)')
+    .select('*,clientes(nombre,tipo)')
     .order('fecha_pedido', { ascending: false }).limit(60);
 
   c.innerHTML = `
@@ -634,23 +643,26 @@ async function renderPedidos(c, a) {
         </div>
       </div>
       <div class="table-scroll"><table>
-        <thead><tr><th>Fecha</th><th>Cliente</th><th>Cantidad</th><th>Jabas</th><th>P.Unit.</th><th>Total</th><th>Entrega</th><th>Estado</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Cliente</th><th>Cantidad</th><th>Jabas</th><th>Total</th><th>Pagado</th><th>Debe</th><th>Entrega</th><th>Estado</th><th></th></tr></thead>
         <tbody>
-          ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="9">Sin pedidos</td></tr>':''}
-          ${(rows||[]).map(r=>`<tr data-estado="${r.estado}">
+          ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="10">Sin pedidos</td></tr>':''}
+          ${(rows||[]).map(r=>{const pagado=Number(r.monto_pagado||0);const total=Number(r.total);const debe=Math.max(0,total-pagado);const pagadoOk=debe<=0;return`<tr data-estado="${r.estado}">
             <td>${formatDate(r.fecha_pedido)}</td>
-            <td>${r.clientes?.nombre||r.cliente_nombre||'—'}</td>
+            <td>${r.clientes?.nombre||r.cliente_nombre||'—'}${r.clientes?.tipo==='revendedor'?' <span class="badge" style="background:var(--warning-light);color:var(--orange-500);font-size:.6rem">Rev.</span>':''}</td>
             <td><strong>${r.cantidad_unidades}</strong></td>
             <td>${jabasBadge(r.cantidad_unidades)}</td>
-            <td>${formatMoney(r.precio_unitario)}</td>
-            <td><strong>${formatMoney(r.total)}</strong></td>
+            <td><strong>${formatMoney(total)}</strong></td>
+            <td>${formatMoney(pagado)}</td>
+            <td>${debe>0?`<strong style="color:var(--danger)">${formatMoney(debe)}</strong>`:formatMoney(0)}</td>
             <td>${formatDate(r.fecha_entrega)}</td>
-            <td><span class="badge badge-${r.estado}">${r.estado}</span></td>
+            <td><span class="badge badge-${r.estado}">${r.estado}</span>${!pagadoOk&&r.estado!=='cancelado'?' <span class="badge badge-pendiente" style="font-size:.6rem">Fiado</span>':''}</td>
             <td style="white-space:nowrap">
               ${r.estado==='pendiente'?`<button class="btn btn-sm btn-primary" onclick="marcarEntregado('${r.id}')">Entregar</button>`:''}
+              ${debe>0&&r.estado!=='cancelado'?`<button class="btn btn-sm btn-cta" onclick="abonarPedido('${r.id}',${total},${pagado})">Abonar</button>`:''}
+              <button class="btn-icon btn-sm" onclick="editarPedido('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
               <button class="btn-icon btn-sm" onclick="deletePedido('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
             </td>
-          </tr>`).join('')}
+          </tr>`}).join('')}
         </tbody>
       </table></div>
     </div>
@@ -688,6 +700,10 @@ async function openPedidoForm(pedido) {
           <option value="cancelado" ${pedido?.estado==='cancelado'?'selected':''}>Cancelado</option>
         </select></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label>Monto Pagado (S/)</label><input type="number" name="monto_pagado" step="0.01" min="0" value="${pedido?.monto_pagado||0}" placeholder="0 = fiado completo"></div>
+        <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:.5rem"><span style="font-size:.85rem;color:var(--muted)">Total se calcula: cantidad x precio</span></div>
+      </div>
       <div class="form-group"><label>Notas</label><textarea name="notas">${pedido?.notas||''}</textarea></div>
     </form>
   `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="savePedido(${pedido?`'${pedido.id}'`:'null'})">Guardar</button>`);
@@ -712,6 +728,34 @@ async function deletePedido(id) {
   if (!confirm('Eliminar este pedido?')) return;
   await db.from('pedidos').delete().eq('id', id);
   toast('Eliminado'); renderPage('pedidos');
+}
+
+async function editarPedido(id) {
+  const { data: p } = await db.from('pedidos').select('*').eq('id', id).single();
+  if (p) openPedidoForm(p);
+}
+
+function abonarPedido(id, total, pagado) {
+  const debe = Math.max(0, total - pagado);
+  openModal('Registrar Abono', `
+    <form id="frm-abono">
+      <div class="stats-grid" style="margin-bottom:1rem">
+        <div class="stat-card"><div class="stat-label">Total del Pedido</div><div class="stat-value">${formatMoney(total)}</div></div>
+        <div class="stat-card"><div class="stat-label">Ya Pagado</div><div class="stat-value">${formatMoney(pagado)}</div></div>
+        <div class="stat-card" style="border-color:var(--danger)"><div class="stat-label">Deuda</div><div class="stat-value" style="color:var(--danger)">${formatMoney(debe)}</div></div>
+      </div>
+      <div class="form-group"><label>Monto a abonar (S/)</label><input type="number" name="abono" step="0.01" min="0.01" max="${debe}" value="${debe}" required></div>
+    </form>
+  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="confirmarAbonoPedido('${id}',${pagado})">Confirmar Abono</button>`);
+}
+
+async function confirmarAbonoPedido(id, pagadoActual) {
+  const abono = parseFloat(document.querySelector('#frm-abono [name=abono]').value);
+  if (!abono || abono <= 0) return toast('Monto inválido', 'error');
+  const nuevoPagado = Math.round((pagadoActual + abono) * 100) / 100;
+  const { error } = await db.from('pedidos').update({ monto_pagado: nuevoPagado }).eq('id', id);
+  if (error) return toast(error.message, 'error');
+  closeModal(); toast(`Abono de ${formatMoney(abono)} registrado`); renderPage('pedidos');
 }
 
 // ==================== STOCK ====================
@@ -864,13 +908,21 @@ async function renderClientes(c, a) {
   const { data: rows } = await db.from('clientes').select('*').order('nombre');
 
   c.innerHTML = `<div class="table-wrap">
-    <div class="table-header"><h3>Lista de Clientes</h3></div>
+    <div class="table-header"><h3>Lista de Clientes</h3>
+      <div class="table-filters">
+        <button class="btn btn-sm btn-outline filter-btn active" onclick="filterClientes(this,'todos')">Todos</button>
+        <button class="btn btn-sm btn-outline filter-btn" onclick="filterClientes(this,'directo')">Directos</button>
+        <button class="btn btn-sm btn-outline filter-btn" onclick="filterClientes(this,'revendedor')">Revendedores</button>
+      </div>
+    </div>
     <div class="table-scroll"><table>
-      <thead><tr><th>Nombre</th><th>Telefono</th><th>Direccion</th><th>Notas</th><th>Estado</th><th></th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Tipo</th><th>Telefono</th><th>Direccion</th><th>Notas</th><th>Estado</th><th></th></tr></thead>
       <tbody>
-        ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="6">Sin clientes</td></tr>':''}
-        ${(rows||[]).map(r=>`<tr>
-          <td><strong>${r.nombre}</strong></td><td>${r.telefono||'—'}</td><td>${r.direccion||'—'}</td><td>${r.notas||'—'}</td>
+        ${(rows||[]).length===0?'<tr class="empty-row"><td colspan="7">Sin clientes</td></tr>':''}
+        ${(rows||[]).map(r=>`<tr data-tipo="${r.tipo||'directo'}">
+          <td><strong>${r.nombre}</strong></td>
+          <td><span class="badge ${r.tipo==='revendedor'?'badge-pendiente':'badge-entregado'}">${r.tipo==='revendedor'?'Revendedor':'Directo'}</span></td>
+          <td>${r.telefono||'—'}</td><td>${r.direccion||'—'}</td><td>${r.notas||'—'}</td>
           <td><span class="badge ${r.activo?'badge-entregado':'badge-cancelado'}">${r.activo?'Activo':'Inactivo'}</span></td>
           <td style="white-space:nowrap">
             <button class="btn-icon btn-sm" onclick="editCliente('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
@@ -882,10 +934,24 @@ async function renderClientes(c, a) {
   </div>`;
 }
 
+function filterClientes(btn, filter) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('tbody tr[data-tipo]').forEach(row => {
+    row.style.display = (filter === 'todos' || row.dataset.tipo === filter) ? '' : 'none';
+  });
+}
+
 async function openClienteForm(cliente) {
   openModal(cliente?'Editar Cliente':'Nuevo Cliente', `
     <form id="frm-cliente">
-      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${cliente?.nombre||''}" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${cliente?.nombre||''}" required></div>
+        <div class="form-group"><label>Tipo</label><select name="tipo">
+          <option value="directo" ${(!cliente||cliente.tipo==='directo')?'selected':''}>Directo</option>
+          <option value="revendedor" ${cliente?.tipo==='revendedor'?'selected':''}>Revendedor</option>
+        </select></div>
+      </div>
       <div class="form-row">
         <div class="form-group"><label>Telefono</label><input type="tel" name="telefono" value="${cliente?.telefono||''}"></div>
         <div class="form-group"><label>Direccion</label><input type="text" name="direccion" value="${cliente?.direccion||''}"></div>
@@ -984,181 +1050,90 @@ async function deleteLote(id) {
   toast('Eliminado'); renderPage('lotes');
 }
 
-// ==================== VENDEDORES (fiado / entregas) ====================
+// ==================== REVENDEDORES (vista de fiado desde pedidos) ====================
 async function renderVendedores(c, a) {
-  a.innerHTML = `<button class="btn btn-outline btn-sm" onclick="showVendedoresList()">Mis vendedores</button>
-    <button class="btn btn-cta" onclick="openVendedorForm()">+ Nuevo Vendedor</button>`;
+  a.innerHTML = '';
 
-  const vendedores = (await db.from('vendedores').select('*').eq('activo', true).order('nombre')).data || [];
-  const { data: entregas } = await db.from('entregas_vendedor').select('*,vendedores(nombre)').order('fecha', { ascending: false }).limit(200);
-  const rows = entregas || [];
+  const { data: pedidos } = await db.from('pedidos')
+    .select('*,clientes!inner(id,nombre,telefono,tipo)')
+    .eq('clientes.tipo', 'revendedor')
+    .neq('estado', 'cancelado')
+    .order('fecha_pedido', { ascending: false });
+  const rows = pedidos || [];
 
   const deuda = {};
   let totalFiado = 0;
-  rows.forEach(e => {
-    const f = e.jabas_entregadas - e.jabas_pagadas;
-    if (f > 0) {
-      const vid = e.vendedor_id || '_';
-      const nom = e.vendedores?.nombre || '—';
-      if (!deuda[vid]) deuda[vid] = { nombre: nom, jabas: 0, monto: 0 };
-      deuda[vid].jabas += f;
-      deuda[vid].monto += f * Number(e.precio_jaba);
-      totalFiado += f * Number(e.precio_jaba);
+  const mes = today().slice(0, 7);
+  let vendidoMes = 0, cobradoMes = 0;
+
+  rows.forEach(p => {
+    const total = Number(p.total);
+    const pagado = Number(p.monto_pagado || 0);
+    const debe = Math.max(0, total - pagado);
+    const cid = p.cliente_id || p.clientes?.id || '_';
+    const nom = p.clientes?.nombre || p.cliente_nombre || '—';
+    const tel = p.clientes?.telefono || '';
+
+    if (debe > 0) {
+      if (!deuda[cid]) deuda[cid] = { nombre: nom, telefono: tel, monto: 0, pedidos: 0 };
+      deuda[cid].monto += debe;
+      deuda[cid].pedidos++;
+      totalFiado += debe;
+    }
+
+    if (p.fecha_pedido && p.fecha_pedido.startsWith(mes)) {
+      vendidoMes += total;
+      cobradoMes += pagado;
     }
   });
+
   const conDeuda = Object.values(deuda).filter(d => d.monto > 0).length;
-
-  const mes = today().slice(0, 7);
-  const delMes = rows.filter(e => e.fecha && e.fecha.startsWith(mes));
-  const entregadoMes = delMes.reduce((s, e) => s + e.jabas_entregadas * Number(e.precio_jaba), 0);
-  const cobradoMes = delMes.reduce((s, e) => s + e.jabas_pagadas * Number(e.precio_jaba), 0);
-  const jabasEntMes = delMes.reduce((s, e) => s + e.jabas_entregadas, 0);
-  const jabasPagMes = delMes.reduce((s, e) => s + e.jabas_pagadas, 0);
-
-  const opts = vendedores.map(v => `<option value="${v.id}">${v.nombre}</option>`).join('');
+  const fiadoRows = rows.filter(p => Number(p.total) - Number(p.monto_pagado || 0) > 0);
 
   c.innerHTML = `
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Total fiado</div>
-        <div class="stat-value" style="color:var(--danger,#c0392b)">${formatMoney(totalFiado)}</div>
-        <div class="stat-sub">${conDeuda} vendedor${conDeuda !== 1 ? 'es' : ''} con deuda</div></div>
-      <div class="stat-card"><div class="stat-label">Entregado este mes</div>
-        <div class="stat-value">${formatMoney(entregadoMes)}</div>
-        <div class="stat-sub">${jabasEntMes} jaba${jabasEntMes !== 1 ? 's' : ''}</div></div>
-      <div class="stat-card"><div class="stat-label">Cobrado este mes</div>
-        <div class="stat-value">${formatMoney(cobradoMes)}</div>
-        <div class="stat-sub">${jabasPagMes} jaba${jabasPagMes !== 1 ? 's' : ''} pagadas</div></div>
+      <div class="stat-card"><div class="stat-label">Fiado total revendedores</div>
+        <div class="stat-value" style="color:var(--danger)">${formatMoney(totalFiado)}</div>
+        <div class="stat-sub">${conDeuda} revendedor${conDeuda !== 1 ? 'es' : ''} con deuda</div></div>
+      <div class="stat-card"><div class="stat-label">Vendido este mes (rev.)</div>
+        <div class="stat-value">${formatMoney(vendidoMes)}</div></div>
+      <div class="stat-card"><div class="stat-label">Cobrado este mes (rev.)</div>
+        <div class="stat-value">${formatMoney(cobradoMes)}</div></div>
     </div>
     ${conDeuda > 0 ? `<div class="table-wrap" style="margin-bottom:24px">
-      <div class="table-header"><h3>Deuda por vendedor</h3></div>
+      <div class="table-header"><h3>Deuda por revendedor</h3></div>
       <div class="table-scroll"><table>
-        <thead><tr><th>Vendedor</th><th>Jabas fiadas</th><th>Monto pendiente</th></tr></thead>
-        <tbody>${Object.values(deuda).filter(d => d.monto > 0).sort((a, b) => b.monto - a.monto).map(d => `<tr>
+        <thead><tr><th>Revendedor</th><th>Telefono</th><th>Pedidos c/deuda</th><th>Monto pendiente</th></tr></thead>
+        <tbody>${Object.values(deuda).sort((a, b) => b.monto - a.monto).map(d => `<tr>
           <td><strong>${d.nombre}</strong></td>
-          <td><span class="stat-jaba">${d.jabas} jaba${d.jabas !== 1 ? 's' : ''}</span></td>
-          <td><strong style="color:var(--danger,#c0392b)">${formatMoney(d.monto)}</strong></td>
+          <td>${d.telefono || '—'}</td>
+          <td>${d.pedidos}</td>
+          <td><strong style="color:var(--danger)">${formatMoney(d.monto)}</strong></td>
         </tr>`).join('')}</tbody>
       </table></div>
-    </div>` : ''}
-    <div class="quick-form">
-      <h3>Registrar entrega</h3>
-      <form id="frm-entrega" class="form-inline" onsubmit="return false">
-        <div class="form-group"><label>Vendedor</label><select name="vendedor_id" required><option value="">— Seleccionar —</option>${opts}</select></div>
-        <div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${today()}" required></div>
-        <div class="form-group"><label>Jabas entregadas</label><input type="number" name="jabas_entregadas" min="1" required placeholder="5"></div>
-        <div class="form-group"><label>Jabas pagadas</label><input type="number" name="jabas_pagadas" min="0" value="0" placeholder="3"></div>
-        <div class="form-group"><label>Precio/jaba</label><input type="number" name="precio_jaba" step="0.01" value="${PRECIO_JABA}"></div>
-        <div class="form-group"><label>Notas</label><input type="text" name="notas" placeholder="Opcional"></div>
-        <div class="form-group"><label>&nbsp;</label><button class="btn btn-cta" onclick="saveEntrega()">Registrar</button></div>
-      </form>
-    </div>
-    <div class="table-wrap">
-      <div class="table-header"><h3>Historial de entregas</h3></div>
+    </div>` : '<p style="text-align:center;color:var(--muted);padding:2rem 0">No hay revendedores con deuda pendiente</p>'}
+    ${fiadoRows.length > 0 ? `<div class="table-wrap">
+      <div class="table-header"><h3>Pedidos con fiado pendiente</h3></div>
       <div class="table-scroll"><table>
-        <thead><tr><th>Fecha</th><th>Vendedor</th><th>Entregadas</th><th>Pagadas</th><th>Fiadas</th><th>Total</th><th>Pagado</th><th>Fiado</th><th>Estado</th><th></th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Revendedor</th><th>Cant.</th><th>Total</th><th>Pagado</th><th>Debe</th><th>Estado</th><th></th></tr></thead>
         <tbody>
-          ${rows.length === 0 ? '<tr class="empty-row"><td colspan="10">Sin entregas registradas</td></tr>' : ''}
-          ${rows.map(e => { const f = e.jabas_entregadas - e.jabas_pagadas; const mt = e.jabas_entregadas * Number(e.precio_jaba); const mp = e.jabas_pagadas * Number(e.precio_jaba); const mf = f * Number(e.precio_jaba); const ok = f <= 0; return `<tr>
-            <td>${formatDate(e.fecha)}</td>
-            <td><strong>${e.vendedores?.nombre || '—'}</strong></td>
-            <td>${e.jabas_entregadas}</td><td>${e.jabas_pagadas}</td>
-            <td>${f > 0 ? `<strong style="color:var(--danger,#c0392b)">${f}</strong>` : '0'}</td>
-            <td>${formatMoney(mt)}</td><td>${formatMoney(mp)}</td>
-            <td>${mf > 0 ? `<strong style="color:var(--danger,#c0392b)">${formatMoney(mf)}</strong>` : formatMoney(0)}</td>
-            <td><span class="badge ${ok ? 'badge-entregado' : 'badge-pendiente'}">${ok ? 'Saldado' : 'Fiado'}</span></td>
-            <td style="white-space:nowrap">
-              ${!ok ? `<button class="btn btn-sm btn-primary" onclick="abonarEntrega('${e.id}',${e.jabas_entregadas},${e.jabas_pagadas})">Abonar</button>` : ''}
-              <button class="btn-icon btn-sm" onclick="deleteEntrega('${e.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
-            </td></tr>`; }).join('')}
+          ${fiadoRows.map(p => { const total=Number(p.total); const pagado=Number(p.monto_pagado||0); const debe=total-pagado; return `<tr>
+            <td>${formatDate(p.fecha_pedido)}</td>
+            <td><strong>${p.clientes?.nombre||p.cliente_nombre||'—'}</strong></td>
+            <td>${p.cantidad_unidades} (${jabasBadge(p.cantidad_unidades)})</td>
+            <td>${formatMoney(total)}</td>
+            <td>${formatMoney(pagado)}</td>
+            <td><strong style="color:var(--danger)">${formatMoney(debe)}</strong></td>
+            <td><span class="badge badge-${p.estado}">${p.estado}</span></td>
+            <td><button class="btn btn-sm btn-cta" onclick="abonarPedido('${p.id}',${total},${pagado})">Abonar</button></td>
+          </tr>`; }).join('')}
         </tbody>
       </table></div>
-    </div>`;
-}
-
-async function saveEntrega() {
-  const d = getFormData('frm-entrega');
-  if (!d.vendedor_id) return toast('Selecciona un vendedor', 'error');
-  if (!d.jabas_entregadas || d.jabas_entregadas < 1) return toast('Indica las jabas entregadas', 'error');
-  d.jabas_pagadas = d.jabas_pagadas || 0;
-  if (d.jabas_pagadas > d.jabas_entregadas) return toast('Las pagadas no pueden superar las entregadas', 'error');
-  d.precio_jaba = d.precio_jaba || PRECIO_JABA;
-  const { error } = await db.from('entregas_vendedor').insert(d);
-  if (error) return toast(error.message, 'error');
-  toast('Entrega registrada'); renderPage('vendedores');
-}
-
-async function abonarEntrega(id, total, pagadas) {
-  const pend = total - pagadas;
-  openModal('Registrar abono', `
-    <form id="frm-abono">
-      <p style="margin-bottom:16px;color:var(--text-secondary,#6b6560)">Hay <strong>${pend} jaba${pend !== 1 ? 's' : ''}</strong> pendiente${pend !== 1 ? 's' : ''} de pago.</p>
-      <div class="form-group"><label>Jabas que abona ahora</label><input type="number" name="jabas_abono" min="1" max="${pend}" value="${pend}" required></div>
-    </form>
-  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="confirmarAbono('${id}',${pagadas})">Confirmar</button>`);
-}
-
-async function confirmarAbono(id, pagadas) {
-  const d = getFormData('frm-abono');
-  if (!d.jabas_abono || d.jabas_abono < 1) return toast('Indica cuantas jabas abona', 'error');
-  const { error } = await db.from('entregas_vendedor').update({ jabas_pagadas: pagadas + d.jabas_abono }).eq('id', id);
-  if (error) return toast(error.message, 'error');
-  closeModal(); toast('Abono registrado'); renderPage('vendedores');
-}
-
-async function deleteEntrega(id) {
-  if (!confirm('Eliminar esta entrega?')) return;
-  await db.from('entregas_vendedor').delete().eq('id', id);
-  toast('Eliminado'); renderPage('vendedores');
-}
-
-async function showVendedoresList() {
-  const { data: rows } = await db.from('vendedores').select('*').order('nombre');
-  openModal('Mis vendedores', `
-    <div class="table-scroll"><table>
-      <thead><tr><th>Nombre</th><th>Telefono</th><th>Zona</th><th>Estado</th><th></th></tr></thead>
-      <tbody>
-        ${(rows || []).length === 0 ? '<tr class="empty-row"><td colspan="5">Sin vendedores registrados</td></tr>' : ''}
-        ${(rows || []).map(r => `<tr>
-          <td><strong>${r.nombre}</strong></td><td>${r.telefono || '—'}</td><td>${r.zona || '—'}</td>
-          <td><span class="badge ${r.activo ? 'badge-entregado' : 'badge-cancelado'}">${r.activo ? 'Activo' : 'Inactivo'}</span></td>
-          <td style="white-space:nowrap">
-            <button class="btn-icon btn-sm" onclick="editVendedor('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3l2.6 2.6L5.4 13.2l-3.3.7.7-3.3L12.1 1.3z"/></svg></button>
-            <button class="btn-icon btn-sm" onclick="deleteVendedor('${r.id}')"><svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M5 2V1h6v1h4v2H1V2h4zm1 4h1v7H6V6zm3 0h1v7H9V6zM2 5h12l-1 10H3L2 5z"/></svg></button>
-          </td>
-        </tr>`).join('')}
-      </tbody>
-    </table></div>
-  `, '<button class="btn btn-outline" onclick="closeModal()">Cerrar</button>');
-}
-
-async function openVendedorForm(vendedor) {
-  openModal(vendedor ? 'Editar vendedor' : 'Nuevo vendedor', `
-    <form id="frm-vendedor">
-      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" value="${vendedor?.nombre || ''}" required></div>
-      <div class="form-group"><label>Telefono</label><input type="tel" name="telefono" value="${vendedor?.telefono || ''}"></div>
-      <div class="form-group"><label>Zona</label><input type="text" name="zona" value="${vendedor?.zona || ''}" placeholder="Ej: SJL, Comas..."></div>
-      <div class="form-group"><label>Notas</label><textarea name="notas">${vendedor?.notas || ''}</textarea></div>
-    </form>
-  `, `<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-cta" onclick="saveVendedor(${vendedor ? `'${vendedor.id}'` : 'null'})">Guardar</button>`);
-}
-
-async function editVendedor(id) {
-  const { data } = await db.from('vendedores').select('*').eq('id', id).single();
-  if (data) openVendedorForm(data);
-}
-
-async function saveVendedor(id) {
-  const d = getFormData('frm-vendedor');
-  if (!d.nombre) return toast('El nombre es obligatorio', 'error');
-  const { error } = id ? await db.from('vendedores').update(d).eq('id', id) : await db.from('vendedores').insert(d);
-  if (error) return toast(error.message, 'error');
-  closeModal(); toast('Vendedor guardado'); renderPage('vendedores');
-}
-
-async function deleteVendedor(id) {
-  if (!confirm('Eliminar este vendedor?')) return;
-  await db.from('vendedores').delete().eq('id', id);
-  toast('Eliminado'); showVendedoresList();
+    </div>` : ''}
+    <p style="text-align:center;color:var(--muted);font-size:.85rem;padding-top:1rem">
+      Para agregar revendedores, ve a <strong>Clientes</strong> y marca el tipo como "Revendedor".<br>
+      Los pedidos se registran en <strong>Pedidos</strong> — aqui solo se muestra la deuda.
+    </p>`;
 }
 
 // ==================== CHART con etiquetas de datos ====================
