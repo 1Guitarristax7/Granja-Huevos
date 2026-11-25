@@ -1,0 +1,60 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Modelo 1 · Institucional (estilo ABFrance / Sorogastua) — 1080x1350 -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--rojo:#c8102e;--navy:#08183c;--gold:#f0be46}
+body{width:1080px;height:1350px;font-family:'Poppins',sans-serif;position:relative;overflow:hidden;color:#fff;
+ background:radial-gradient(circle at 78% 42%,rgba(60,110,200,.35),transparent 45%),linear-gradient(180deg,#0a1d48 0%,#08183c 55%,#061230 100%)}
+.tag{position:absolute;left:60px;top:60px;background:var(--rojo);font-size:25px;font-weight:700;padding:8px 26px;border-radius:26px}
+.logo{position:absolute;right:60px;top:59px;height:52px}
+.kick{position:absolute;left:60px;top:150px;display:flex;align-items:center;gap:20px;font-size:24px;font-weight:700;color:var(--gold);letter-spacing:.5px}
+.kick::before{content:"";width:80px;height:5px;background:var(--gold)}
+h1{position:absolute;left:60px;top:190px;font-size:64px;font-weight:800;line-height:1.12;letter-spacing:-.5px}
+h1 .gold{color:var(--gold)}
+.sub{position:absolute;left:60px;top:355px;width:560px;font-size:23px;font-weight:600;color:#bec9eb;line-height:1.35}
+.foto{position:absolute;left:650px;top:390px;width:370px;height:370px;border-radius:50%;background:var(--rojo);box-shadow:0 0 60px 20px rgba(90,150,255,.3)}
+.foto img{position:absolute;inset:11px;width:348px;height:348px;border-radius:50%}
+.foto svg{position:absolute;left:-12px;top:-12px;width:394px;height:394px}
+.cards{position:absolute;left:60px;top:450px;width:540px;display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;border-radius:16px;border-left:12px solid var(--rojo);padding:8px 20px 10px;color:var(--navy)}
+.card small{display:block;font-size:18px;font-weight:700;color:var(--rojo)}
+.card b{display:block;font-size:27px;font-weight:700;line-height:1.25}
+.card i{display:block;font-style:normal;font-size:20px;font-weight:600;color:#3b4a6b}
+.pres{position:absolute;left:670px;top:790px;width:330px;text-align:center;border:3px solid var(--gold);color:var(--gold);font-size:23px;font-weight:700;padding:8px 0;border-radius:30px;letter-spacing:1px}
+.req{position:absolute;left:60px;right:60px;top:875px;background:rgba(255,255,255,.07);border:2px solid rgba(240,190,70,.55);border-radius:20px;padding:22px 30px 24px}
+.req h2{font-size:22px;font-weight:800;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+.it{display:flex;gap:18px;align-items:center;margin-top:14px}
+.ic{flex:none;width:56px;height:56px;border-radius:50%;background:var(--rojo);display:grid;place-items:center}
+.ic svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.it p{font-size:23px;font-weight:500;line-height:1.35;color:#e6ecfa}
+.it b{color:#fff;font-weight:700}
+.orgz{position:absolute;left:60px;right:60px;top:1240px;text-align:center;font-size:25px;font-weight:700;color:#08183c;background:#f0be46;border-radius:16px;padding:14px 0}
+</style></head><body>
+<div class="tag">Dirigido a estudiantes del Honors Program</div>
+<img class="logo" src="assets/ucv_logo_blanco.png">
+<div class="kick">VISITA TÉCNICA EMPRESARIAL</div>
+<h1>Visita técnica a<br><span class="gold">APM Terminals Callao</span></h1>
+<div class="sub">Puerto multipropósito, terminal de contenedores y aduanas marítimas.</div>
+
+<div class="cards">
+  <div class="card"><small>FECHA</small><b>Jueves 26 de noviembre</b></div>
+  <div class="card"><small>HORA DE LA CITA</small><b>6:00 a. m.</b></div>
+  <div class="card"><small>PUNTO DE PARTIDA</small><b>Puerta 3</b><i>Sede Lima Norte</i></div>
+</div>
+
+<div class="foto"><img src="assets/puerto.svg">
+  <svg viewBox="0 0 404 404"><path d="M 26 115 A 190 190 0 0 1 378 115" fill="none" stroke="#f0be46" stroke-width="5"/></svg></div>
+<div class="pres">MODALIDAD PRESENCIAL</div>
+
+<div class="req">
+  <h2>IMPORTANTE PARA EL INGRESO</h2>
+  <div class="it"><div class="ic"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2"/><circle cx="8.5" cy="11" r="2.2"/><path d="M5.5 16c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 10h4.5M14 13.5h3"/></svg></div>
+    <p>Trae en físico tu <b>DNI o pasaporte vigente</b>. De lo contrario, <b>no se permitirá tu acceso</b> a las instalaciones.</p></div>
+  <div class="it"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.2"/><path d="M3 3l18 18"/></svg></div>
+    <p><b>No está permitido</b> el ingreso de cámaras fotográficas ni cámaras filmadoras.</p></div>
+  <div class="it"><div class="ic"><svg viewBox="0 0 24 24"><path d="M8 3l-4 3 2 4 2-1v12h8V9l2 1 2-4-4-3c-.5 1.5-2 2.5-4 2.5S8.5 4.5 8 3z"/><path d="M3 3l18 18"/></svg></div>
+    <p><b>NO vestir:</b> short, faldas, buzos, sandalias o zapatos abiertos, zapatos de taco, bividis o polos de tiritas.</p></div>
+</div>
+<div class="orgz">¡Sé puntual! Te esperamos a las 6:00 a. m. en Puerta 3.</div>
+</body></html>
