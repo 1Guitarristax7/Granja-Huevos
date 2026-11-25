@@ -43,7 +43,7 @@
 ## Elena · Consistencia
 - ✓ Fecha (jueves 26/11/2026), hora (6:00 a. m., hora de la cita), lugar (Puerta 3, Sede Lima Norte) y las 3 restricciones son idénticas en las 4 piezas.
 - ✓ "Multisede Lima" y "Actividad 05/07" salen del evento de Google Calendar del Honors Program 2026-II.
-- 🟡 La "nube" "La Dirección Nacional de ANI te informa" (M1) es parte del estilo aprobado. Jorge debe confirmar que la Dirección firma esta visita.
+- ✓ La "nube" "La Dirección Nacional de ANI te informa" (M1) es parte del estilo aprobado. Jorge confirmó el 25/11/2026 que la Dirección Nacional firma la visita.
 
 ## Arreglos priorizados
 
@@ -52,7 +52,7 @@
 | 1 | 🟡 | Quitar la redundancia de "Honors Program" en el pie de M1 | ✅ hecho |
 | 2 | 🟡 | Quitar la redundancia del encabezado de M2 frente a "¿Para quién?" | ✅ hecho |
 | 3 | 🟡 | Foto de estudiantes sonrientes (pide la guía dinámica) | ⏳ necesita insumo de Jorge |
-| 4 | 🟡 | Confirmar que la Dirección Nacional ANI firma la nube de M1 | ⏳ confirmar |
+| 4 | 🟡 | Confirmar que la Dirección Nacional ANI firma la nube de M1 | ✅ confirmado por Jorge (25/11) |
 | 5 | 🟡 | Contacto para consultas en el pie | ⏳ solo si hay un dato real |
 | 6 | 🟢 | Medalla del encabezado de M1 a mayor tamaño o solo texto | opcional |
 
