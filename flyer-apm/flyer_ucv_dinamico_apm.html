@@ -65,7 +65,9 @@ body{width:1080px;height:1350px;font-family:'Poppins',sans-serif;overflow:hidden
 <svg class="wave" viewBox="0 0 1080 790" preserveAspectRatio="none">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f4fd1"/><stop offset=".6" stop-color="#123c9c"/><stop offset="1" stop-color="#0b1f5c"/></linearGradient>
   <pattern id="p" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="16" height="40" fill="rgba(255,255,255,.04)"/></pattern></defs>
-  <path d="M0 70 C 260 0, 620 120, 1080 20 L1080 790 L0 790 Z" fill="url(#g)"/>
+  <clipPath id="c"><path d="M0 70 C 260 0, 620 120, 1080 20 L1080 790 L0 790 Z"/></clipPath>
+  <image href="assets/fondo_patio.jpg" x="0" y="0" width="1080" height="790" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/>
+  <path d="M0 70 C 260 0, 620 120, 1080 20 L1080 790 L0 790 Z" fill="url(#g)" opacity=".6"/>
   <path d="M0 70 C 260 0, 620 120, 1080 20 L1080 790 L0 790 Z" fill="url(#p)"/>
   <path d="M0 62 C 260 -8, 620 112, 1080 12" stroke="#ffd400" stroke-width="12" fill="none"/>
   <path d="M0 84 C 260 14, 620 134, 1080 34" stroke="#e30613" stroke-width="6" fill="none"/>
