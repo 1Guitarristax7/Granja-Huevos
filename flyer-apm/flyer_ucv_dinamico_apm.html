@@ -1,0 +1,102 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Flyer UCV estilo dinámico (skill flyer-ucv-dinamico, base: flyer_xiv_curso_mincetur) — 1080x1350 -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,600;0,700;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--rojo:#e30613;--azul:#123c9c;--navy:#0b1f5c;--ama:#ffd400}
+body{width:1080px;height:1350px;font-family:'Poppins',sans-serif;overflow:hidden;position:relative;color:#fff;background:#fff}
+.I{font-style:italic;font-weight:900}
+.brush{clip-path:polygon(1% 14%,6% 2%,30% 6%,55% 0,80% 5%,97% 1%,100% 22%,97% 48%,100% 78%,95% 100%,70% 95%,40% 100%,12% 96%,2% 100%,0 75%,3% 48%)}
+.head{position:absolute;top:0;left:0;right:0;height:96px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 40px;z-index:10;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.hp{display:flex;align-items:center;gap:14px;color:var(--navy);font-weight:800;font-size:20px;line-height:1.05}
+.hp img{height:70px;width:70px}
+.hp small{display:block;font-size:15px;font-weight:600;color:#55607f}
+.head img.u{height:48px}
+.hero{position:absolute;top:96px;left:0;right:0;height:560px;background:url(assets/puerto_aereo.jpg) 0 -150px/1080px auto no-repeat}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.0) 0%,rgba(11,31,92,.0) 60%,rgba(11,31,92,.35) 100%)}
+.info{position:absolute;top:110px;right:30px;width:340px;background:#fff;color:var(--navy);font-size:16px;font-weight:700;line-height:1.25;padding:8px 14px;border-radius:22px;border:3px solid var(--ama);box-shadow:0 6px 14px rgba(0,0,0,.25);text-align:center;z-index:9}
+.info:before{content:"";position:absolute;top:-17px;right:70px;border:14px solid transparent;border-bottom:16px solid var(--ama);border-top:0}
+.info:after{content:"";position:absolute;top:-12px;right:73px;border:11px solid transparent;border-bottom:13px solid #fff;border-top:0}
+.info b{color:var(--rojo)}
+.ttl{position:absolute;left:24px;top:160px;z-index:6;transform:rotate(-6deg);transform-origin:left top}
+.ttl .l{display:block;width:max-content;line-height:.98;text-transform:uppercase}
+.l1{background:var(--ama);color:var(--navy);font-size:46px;padding:4px 26px 0 18px;margin-left:6px}
+.l2,.l3{background:var(--rojo);color:#fff;font-size:74px;padding:6px 30px 2px 20px;margin-top:-4px;text-shadow:3px 3px 0 rgba(0,0,0,.25)}
+.l3{background:var(--navy)}
+.hook{position:absolute;left:40px;top:455px;z-index:6;color:var(--navy);background:#fff;font-size:25px;padding:4px 20px;border-radius:30px;transform:rotate(-6deg);box-shadow:4px 4px 0 var(--ama)}
+.tag{position:absolute;right:40px;top:470px;z-index:6;color:#fff;font-size:32px;line-height:1;text-align:right;transform:rotate(-8deg);text-shadow:2px 2px 8px rgba(0,0,0,.8)}
+.tag span{color:var(--ama);font-size:44px}
+.wave{position:absolute;top:560px;left:0;width:1080px;height:790px;z-index:5}
+.who{position:absolute;top:640px;left:40px;right:40px;z-index:7;background:var(--ama);color:var(--navy);border-radius:26px;padding:14px 24px;display:flex;gap:18px;align-items:center;transform:rotate(-2deg);box-shadow:0 10px 0 rgba(0,0,0,.25)}
+.who .lbl{background:var(--navy);color:var(--ama);font-size:26px;padding:6px 16px;border-radius:12px;transform:rotate(-4deg);white-space:nowrap}
+.who .c{flex:1;font-size:23px;font-weight:800;line-height:1.2}
+.pill{display:inline-block;background:var(--azul);color:#fff;font-weight:900;font-style:italic;font-size:19px;padding:2px 14px;border-radius:20px;margin:5px 5px 0 0}
+.rq{position:absolute;top:792px;left:44px;right:44px;z-index:7}
+.rq h3{display:inline-block;background:var(--rojo);color:#fff;font-size:28px;padding:4px 22px 2px;transform:rotate(-3deg);margin-bottom:14px;box-shadow:5px 5px 0 var(--navy)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 30px}
+.it{display:flex;gap:14px;align-items:flex-start;font-size:26px;font-weight:800;line-height:1.2}
+.it .ck{flex:0 0 38px;height:38px;border-radius:50%;background:var(--ama);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+.it small{display:block;font-size:20px;font-weight:600;color:#d9e3ff;margin-top:2px}
+.rib{position:absolute;top:1030px;left:30px;right:30px;z-index:8;background:#fff;color:var(--navy);border-radius:60px 14px 60px 14px;transform:rotate(-3deg);display:flex;align-items:center;padding:14px 20px;box-shadow:0 8px 0 var(--ama)}
+.rib .s{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;line-height:1.05}
+.rib .s+.s{border-left:3px solid #d6dcea}
+.rib .ci{flex:none;width:54px;height:54px;border-radius:50%;background:var(--azul);display:grid;place-items:center}
+.rib .ci svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rib .t{font-size:17px;font-weight:900;font-style:italic;text-transform:uppercase;color:#55607f}
+.rib .v{display:block;font-size:30px;font-weight:900;font-style:italic;color:var(--rojo)}
+.go{position:absolute;top:1135px;left:120px;z-index:9;background:var(--ama);color:var(--navy);font-size:40px;padding:6px 44px 0;transform:rotate(-4deg)}
+.foot{position:absolute;top:1218px;left:30px;right:30px;height:115px;z-index:8;background:#fff;color:var(--navy);border-radius:70px 20px 70px 20px;display:flex;align-items:center;gap:18px;padding:0 34px 0 16px;box-shadow:0 8px 18px rgba(0,0,0,.3)}
+.foot img{width:92px;height:92px}
+</style></head><body>
+<div class="head">
+  <div class="hp"><img src="assets/honors_medalla.png"><div>Honors Program<small>Escuela de Administración y Negocios Internacionales</small></div></div>
+  <img class="u" src="assets/ucv_logo.png">
+</div>
+<div class="hero"></div>
+<div class="info">📢 La <b>Dirección Nacional de Administración y Negocios Internacionales</b> te informa</div>
+<div class="ttl I">
+  <span class="l l1 brush">Visita técnica a</span>
+  <span class="l l2 brush">APM Terminals</span>
+  <span class="l l3 brush">Callao</span>
+</div>
+<div class="hook I">¿Listo para ver el comercio exterior en vivo? 🚢</div>
+<div class="tag I">Del aula<br><span>al puerto</span></div>
+
+<svg class="wave" viewBox="0 0 1080 790" preserveAspectRatio="none">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f4fd1"/><stop offset=".6" stop-color="#123c9c"/><stop offset="1" stop-color="#0b1f5c"/></linearGradient>
+  <pattern id="p" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="16" height="40" fill="rgba(255,255,255,.04)"/></pattern></defs>
+  <path d="M0 70 C 260 0, 620 120, 1080 20 L1080 790 L0 790 Z" fill="url(#g)"/>
+  <path d="M0 70 C 260 0, 620 120, 1080 20 L1080 790 L0 790 Z" fill="url(#p)"/>
+  <path d="M0 62 C 260 -8, 620 112, 1080 12" stroke="#ffd400" stroke-width="12" fill="none"/>
+  <path d="M0 84 C 260 14, 620 134, 1080 34" stroke="#e30613" stroke-width="6" fill="none"/>
+</svg>
+
+<div class="who"><div class="lbl I">🙋 ¿ES PARA TI?</div>
+  <div class="c">Miembros del <span class="I">Honors Program</span><br><span class="pill">2026-II</span><span class="pill">Multisede Lima</span></div>
+  <div class="c" style="flex:.8;border-left:3px solid var(--navy);padding-left:18px">Conoce el puerto<br><span class="I" style="font-size:27px">por dentro ⚓</span></div>
+</div>
+
+<div class="rq"><h3 class="I">👇 ¿QUÉ NECESITAS?</h3>
+  <div class="grid">
+    <div class="it"><span class="ck">✓</span><div>DNI o pasaporte vigente<small>en físico, sin él no ingresas</small></div></div>
+    <div class="it"><span class="ck">✓</span><div>Dejar la cámara en casa<small>no se permiten cámaras de foto ni filmadoras</small></div></div>
+    <div class="it" style="grid-column:1/3"><span class="ck">✓</span><div>Vestimenta adecuada<small>NO short, faldas, buzos, sandalias, zapatos abiertos o de taco, bividis ni polos de tiritas</small></div></div>
+  </div>
+</div>
+
+<div class="rib">
+  <div class="s"><div class="ci"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><span class="t">Jueves</span><span class="v">26 NOV</span></div></div>
+  <div class="s"><div class="ci"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div><span class="t">Cita</span><span class="v">6:00 A.M.</span></div></div>
+  <div class="s"><div class="ci"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><div><span class="t">Sede Lima Norte</span><span class="v">PUERTA 3</span></div></div>
+</div>
+<div class="go I brush">⏰ ¡SÉ PUNTUAL: 6:00 A.M. EN PUNTO!</div>
+
+<div class="foot">
+  <img src="assets/honors_medalla.png">
+  <div style="flex:1">
+    <div class="I" style="font-size:25px;color:var(--rojo)">🚢 Visita técnica presencial</div>
+    <div style="font-size:21px;font-weight:800">Honors Program 2026-II · Escuela de Administración y Negocios Internacionales</div>
+  </div>
+  <div class="I" style="font-size:28px;color:var(--azul);line-height:1;transform:rotate(-8deg);text-align:center">⚓<br>¡No faltes!</div>
+</div>
+</body></html>
